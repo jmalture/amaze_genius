@@ -55,7 +55,7 @@
     "tour_kicker": "Rundgang",
     "tour_title_a": "So einfach gestalten",
     "tour_title_b": "deine Kund:innen.",
-    "tour_lead": "So sieht Amaze Genius im Dark Mode aus, hier im Look von dm Foto. Fünf Schritte vom ersten Foto bis zum Warenkorb.",
+    "tour_lead": "So sieht Amaze Genius im Dark Mode aus. Fünf Schritte vom ersten Foto bis zum Warenkorb.",
     "tour_steps": [
       {
         "key": "fotos",
@@ -83,7 +83,7 @@
         "text": "Vorschau ansehen, Seitenzahl und Preis im Blick. Mit einem Klick liegt das Fotobuch im Warenkorb deines Shops."
       }
     ],
-    "tour_mock_note": "Amaze Genius im Dark Mode, im Branding von dm Foto.",
+    "tour_mock_note": "Amaze Genius im Dark Mode, hier im Branding eines Kunden.",
     "brand_kicker": "White Label",
     "brand_title_a": "Dein Editor.",
     "brand_title_b": "Deine Farben.",
@@ -279,7 +279,7 @@
       },
       {
         "q": "Wo ist Amaze Genius schon im Einsatz?",
-        "a": "Zum Beispiel bei dm Foto: Der Fotobuch-Editor auf foto.dm.de läuft mit Amaze Genius. Auch allcop setzt auf Amaze Genius."
+        "a": "Zum Beispiel bei allcop im allcopSTORE und beim Fotoservice i-Port. Dort gestalten Kund:innen ihre Fotobücher, Kalender und Fotogeschenke mit Amaze Genius."
       },
       {
         "q": "Für welche Produkte eignet sich der Editor?",
@@ -341,14 +341,14 @@
     "refs_label": "Im Einsatz bei",
     "refs": [
       {
-        "name": "dm Foto",
-        "note": "Fotobuch-Editor auf foto.dm.de",
-        "href": "https://foto.dm.de/"
+        "name": "allcop",
+        "note": "Fotobücher und Fotogeschenke auf allcop-store.de",
+        "href": "https://www.allcop-store.de/"
       },
       {
-        "name": "allcop",
-        "note": "Fotolabor und Shop",
-        "href": ""
+        "name": "i-Port",
+        "note": "Fotoservice auf i-port.de",
+        "href": "https://www.i-port.de/"
       }
     ]
   }

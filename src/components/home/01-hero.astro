@@ -12,6 +12,10 @@ const t = pick(data as Record<string, any>, lang);
 ---
 
 <section class="ag-hero" id="start" data-hero>
+  <picture class="ag-hero__poster" aria-hidden="true">
+    <source media="(orientation: portrait)" srcset="/media/hero-ribbon-portrait.webp" />
+    <img src="/media/hero-ribbon.webp" alt="" width="1600" height="900" decoding="async" fetchpriority="low" />
+  </picture>
   <canvas class="ag-hero__gl" aria-hidden="true" data-ribbons="hero"></canvas>
   <div class="ag-hero__veil" aria-hidden="true"></div>
 
@@ -65,22 +69,37 @@ const t = pick(data as Record<string, any>, lang);
   const canvas = document.querySelector<HTMLCanvasElement>('[data-ribbons="hero"]');
   const section = document.querySelector<HTMLElement>('[data-hero]');
   if (canvas && section) {
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const q = new URLSearchParams(location.search).get('pose');
-    // One big ribbon morphing through the 2023 motifs, plus a faint mirrored echo for depth.
-    const ctl = createRibbons(canvas, {
-      still,
-      pose: q != null ? Number(q) : undefined,
-      sparkles: 9,
-      alpha: 0.62,
-      duration: 12,
-      motion: 0.6,
-      ribbons: [
-        { poses: HERO_POSES, lines: 92, fan: 0.3 },
-        { poses: HERO_POSES, offset: 3, flipX: true, flipY: true, gain: 0.24, lines: 56, width: 0.75, fan: 0.2 },
-      ],
-    });
-    section.classList.add(ctl ? 'has-gl' : 'no-gl');
+    const pose = q != null ? Number(q) : undefined;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // The poster (a still of the first pose) is on screen from the first paint. The live ribbon starts only once
+    // the page has loaded and the browser is idle, so WebGL never competes with the first render. Reduced motion:
+    // the poster is the hero. No GPU: createRibbons returns null and the poster stays.
+    const boot = async () => {
+      const ctl = await createRibbons(canvas, {
+        pose,
+        intro: false, // the poster already shows the ribbon; the live one cross-fades in over it
+        sparkles: 9,
+        alpha: 0.62,
+        duration: 12,
+        motion: 0.6,
+        ribbons: [
+          { poses: HERO_POSES, lines: 92, fan: 0.3 },
+          { poses: HERO_POSES, offset: 3, flipX: true, flipY: true, gain: 0.24, lines: 56, width: 0.75, fan: 0.2 },
+        ],
+        onReady: () => section.classList.add('has-gl'),
+      });
+      if (!ctl) section.classList.add('no-gl');
+    };
+    if (pose != null) {
+      section.classList.add('is-poster-shot');
+      boot();
+    } else if (!reduced) {
+      const idle = () =>
+        'requestIdleCallback' in window ? requestIdleCallback(() => boot(), { timeout: 1500 }) : setTimeout(boot, 300);
+      if (document.readyState === 'complete') idle();
+      else addEventListener('load', idle, { once: true });
+    }
   }
 </script>
 
@@ -107,8 +126,27 @@ const t = pick(data as Record<string, any>, lang);
   .ag-hero.has-gl .ag-hero__gl {
     opacity: 1;
   }
-  /* Fallback without WebGL: soft spectrum glows */
-  .ag-hero.no-gl::before,
+  /* Still of the ribbon: shown from the first paint, fades out once the live ribbon runs */
+  .ag-hero__poster {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    transition: opacity 1.4s var(--ag-ease);
+  }
+  .ag-hero__poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ag-hero.has-gl .ag-hero__poster,
+  .ag-hero.is-poster-shot .ag-hero__poster {
+    opacity: 0;
+  }
+  /* rendering the poster itself: only the ribbon, nothing else */
+  .ag-hero.is-poster-shot > :not(canvas) {
+    visibility: hidden;
+  }
+  /* Fallback if even the poster can't load: soft spectrum glows */
   .no-js .ag-hero::before {
     content: '';
     position: absolute;
@@ -220,14 +258,19 @@ const t = pick(data as Record<string, any>, lang);
     line-height: 0.98;
     letter-spacing: -0.04em;
   }
+  /* Each line clips the rise-in animation. The clip box and the words themselves get extra room below (and a little
+     to the sides), so descenders (g, comma) are not cut: with background-clip:text a gradient word only paints
+     inside its own box, so that box must reach below the baseline. */
   .ag-hero__line {
     display: block;
     overflow: clip;
-    padding-bottom: 0.1em;
-    margin-bottom: -0.1em;
+    padding: 0 0.08em 0.26em;
+    margin: 0 -0.08em -0.26em;
   }
   .ag-hero__line > span {
     display: inline-block;
+    padding: 0.02em 0.06em 0.24em;
+    margin: -0.02em -0.06em -0.24em;
   }
   .js .ag-hero__line > span {
     translate: 0 108%;

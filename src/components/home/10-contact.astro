@@ -108,10 +108,10 @@ const ok = (form.form_ok as Record<string, string>)[lang] ?? form.form_ok.de;
   const canvas = document.querySelector<HTMLCanvasElement>('[data-ribbons="contact"]');
   if (canvas) {
     const io = new IntersectionObserver(
-      ([e]) => {
+      async ([e]) => {
         if (!e.isIntersecting) return;
         io.disconnect();
-        const ok = createRibbons(canvas, {
+        const ok = await createRibbons(canvas, {
           still: matchMedia('(prefers-reduced-motion: reduce)').matches,
           sparkles: 5,
           alpha: 0.3,

@@ -17,10 +17,20 @@
 - **Rundgang** now shows the real dark-mode screens from Figma (Fotobuch Desktop → "000 Dark mode", dm branding,
   approved by Honza). Step 4 narrows the window into a tablet. Source PNG on Honza's PC:
   `Documents\Jenomics\amaze-genius-assets\figma\fotobuch-desktop-dark.png`.
-- **References** band under the hero: dm Foto (link to foto.dm.de) and allcop, as text marks (no logos), approved by
-  Honza; FAQ entry added.
+- **References** band under the hero: allcop (allcop-store.de) first, then i-Port (i-port.de), as text marks
+  (no logos), per Honza; dm Foto removed as a named reference (the Rundgang screens still show the dm branding).
+  FAQ entry added.
 - **Demo on GitHub Pages**: `.github/workflows/pages.yml` publishes every push to main to
   https://jmalture.github.io/amaze_genius/ (noindex, contact form inactive there).
+
+## Update 16.10. 15:30: loading
+- Hero headline no longer clips the descenders (g, comma) of the gradient word.
+- References: allcop (allcop-store.de) first, i-Port (i-port.de) second.
+- Loading: ribbon poster image from the first paint, WebGL deferred to idle after load with non-blocking shader
+  compile, ~3× cheaper vertex shader (analytic tangent), no WebGL at all on software renderers.
+  `server.mjs` adds Brotli/gzip + cache headers (`npm start`). Lighthouse local: desktop 100 (TBT 0 ms),
+  mobile 99 (TBT 30 ms), was 86 / TBT 320 ms desktop on PageSpeed.
+- Posters: rendered from `/?pose=0` at 1600×900 (landscape) and 390×844 @2x → 600×1298 (portrait), WebP q62.
 
 ## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
@@ -39,7 +49,6 @@
 - Integration paths and "Jenomics übernimmt Personalisierung und Produktionsanbindung" (blog).
 - Ablauf steps (Kennenlernen → Personalisieren → Anbinden → Live) are a plausible process, not from a source.
 - "Nachfolger von IKONA" (blog: IKONA is the current predecessor).
-- Can a customer (dm / Allcop) be named as a reference? Not named on the page yet.
 
 ## Open
 - Domain (set `site` in `astro.config.mjs`), Hostinger Node.js app, SMTP env vars, MAIL_TO recipient.

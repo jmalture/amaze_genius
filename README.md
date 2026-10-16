@@ -38,6 +38,9 @@ send there). One-time setup: repo Settings → Pages → Source "Deploy from a b
 ## Deployment (Hostinger Node.js app, linked via GitHub)
 
 - Build command `npm run build`, start command `npm start`, Node 20.3 or newer.
+- `npm start` runs `server.mjs`: it serves dist/client itself (Brotli/gzip, compressed once at start-up; `/_astro/*`
+  cached for a year, fonts/media 30 days, HTML revalidated) and passes `/api/*` and 404s to Astro's Node handler.
+  Reads `PORT` (set by Hostinger) and `HOST` (default 0.0.0.0).
 - Environment variables: see `.env.example` (SMTP, recipients, `SUBMISSIONS_DIR`).
 - Set the final domain in `astro.config.mjs` (`site`).
 
@@ -46,6 +49,10 @@ send there). One-time setup: repo Settings → Pages → Source "Deploy from a b
 - No third-party requests; Outfit + Wix Madefor Display self-hosted, latin subsets preloaded.
 - All CSS inlined; scripts are small deferred modules. LCP is the hero headline (text).
 - Animations are transform/opacity only, WebGL pauses off screen / in background tabs.
-- Target: 100 in PageSpeed. Measured locally (uncompressed server): desktop 100, mobile 92 (slow-4G simulation).
+- Hero: a still poster of the ribbon (`public/media/hero-ribbon*.webp`, ~50/30 KB) paints immediately; WebGL starts
+  after the load event when the browser is idle, compiles its shaders in the background
+  (KHR_parallel_shader_compile) and cross-fades in. No GPU (software renderer) or reduced motion: poster only.
+  Re-render the posters after changing the first pose: open `/?pose=0` and capture the hero (see docs/STATUS.md).
+- Target: 100 in PageSpeed. Measured locally with server.mjs: desktop 100, mobile 99 (slow-4G simulation).
 
 Status, open questions and where the real graphics go: `docs/STATUS.md`.

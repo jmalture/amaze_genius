@@ -27,7 +27,7 @@
   --ag-line-2: rgba(255, 255, 255, 0.14);
   --ag-text: #f4f4f7;
   --ag-muted: #a8a8b8;
-  --ag-dim: #74748a;
+  --ag-dim: #7d7d93; /* 4.9:1 on --ag-bg */
 
   /* The logo spectrum (2023 network motif colours + 2025 brand colours) */
   --ag-red: #f81200;

@@ -50,6 +50,10 @@ export interface RibbonOptions {
   lag?: number;
   /** pace of the ambient wobble, twist and sparkles (1 = default) */
   motion?: number;
+  /** draw even on a software renderer (normally returns null so the page keeps its poster) */
+  allowSoftware?: boolean;
+  /** called once the first live frame is on screen */
+  onReady?: () => void;
   segments?: number;
   sparkles?: number;
   alpha?: number;
@@ -85,7 +89,12 @@ vec4 cr(vec4 a, vec4 b, vec4 c, vec4 d, float t) {
   return 0.5 * (2.0 * b + (c - a) * t + (2.0 * a - 5.0 * b + 4.0 * c - d) * t2 + (3.0 * b - a - 3.0 * c + d) * t3);
 }
 
-void spline(int r, float u, out vec4 P, out vec4 Q) {
+// Derivative of cr() with respect to t: the direction of the centre line, without evaluating the curve twice more.
+vec2 crd(vec2 a, vec2 b, vec2 c, vec2 d, float t) {
+  return 0.5 * ((c - a) + 2.0 * t * (2.0 * a - 5.0 * b + 4.0 * c - d) + 3.0 * t * t * (3.0 * b - a - 3.0 * c + d));
+}
+
+void spline(int r, float u, out vec4 P, out vec4 Q, out vec2 D) {
   float f = clamp(u, 0.0, 1.0) * 6.0;
   float fi = min(floor(f), 5.0);
   float t = f - fi;
@@ -96,15 +105,14 @@ void spline(int r, float u, out vec4 P, out vec4 Q) {
   int i3 = b + int(min(fi + 2.0, 6.0));
   P = cr(uP[i0], uP[i1], uP[i2], uP[i3], t);
   Q = cr(uQ[i0], uQ[i1], uQ[i2], uQ[i3], t);
+  D = crd(uP[i0].xy, uP[i1].xy, uP[i2].xy, uP[i3].xy, t);
 }
 
 // World position of line v (0…1 across the band) at u (0…1 along it). s = perspective scale, hue out.
 vec3 ribbon(int r, float u, float v, out float s, out float hue, out float gain) {
-  vec4 P; vec4 Q; vec4 Pa; vec4 Qa; vec4 Pb; vec4 Qb;
-  spline(r, u, P, Q);
-  spline(r, u - 0.004, Pa, Qa);
-  spline(r, u + 0.004, Pb, Qb);
-  vec2 T = vec2((Pb.x - Pa.x) * uSX, (Pb.y - Pa.y) * uSY);
+  vec4 P; vec4 Q; vec2 D;
+  spline(r, u, P, Q, D);
+  vec2 T = vec2(D.x * uSX, D.y * uSY);
   vec2 Nn = normalize(vec2(-T.y, T.x) + vec2(0.0, 1e-5));
   vec3 C = vec3(P.x * uSX, P.y * uSY, P.z);
   float th = Q.x + (v - 0.5) * Q.w;
@@ -180,27 +188,50 @@ void main() {
   gl_FragColor = vec4(mix(vCol, vec3(1.0), core) * a, a);
 }`;
 
-function compile(gl: WebGLRenderingContext, vs: string, fs: string) {
+/** Starts compiling and linking a program. Errors are checked later (see ready()), so the GPU driver can compile in
+ *  the background where KHR_parallel_shader_compile is available. */
+function build(gl: WebGLRenderingContext, vs: string, fs: string) {
   const make = (type: number, src: string) => {
     const sh = gl.createShader(type)!;
     gl.shaderSource(sh, src);
     gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh) || 'shader');
     return sh;
   };
+  const v = make(gl.VERTEX_SHADER, vs);
+  const f = make(gl.FRAGMENT_SHADER, fs);
   const p = gl.createProgram()!;
-  gl.attachShader(p, make(gl.VERTEX_SHADER, vs));
-  gl.attachShader(p, make(gl.FRAGMENT_SHADER, fs));
+  gl.attachShader(p, v);
+  gl.attachShader(p, f);
   gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p) || 'link');
-  return p;
+  return { p, v, f };
+}
+
+/** Resolves once all programs are linked, without blocking the main thread when the driver can compile in parallel. */
+function ready(gl: WebGLRenderingContext, progs: ReturnType<typeof build>[]) {
+  const ext = gl.getExtension('KHR_parallel_shader_compile') as { COMPLETION_STATUS_KHR: number } | null;
+  return new Promise<boolean>((resolve) => {
+    const check = () => {
+      if (ext && !progs.every(({ p }) => gl.getProgramParameter(p, ext.COMPLETION_STATUS_KHR))) {
+        requestAnimationFrame(check);
+        return;
+      }
+      for (const { p, v, f } of progs)
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+          console.warn('[ribbons]', gl.getShaderInfoLog(v) || gl.getShaderInfoLog(f) || gl.getProgramInfoLog(p));
+          resolve(false);
+          return;
+        }
+      resolve(true);
+    };
+    check();
+  });
 }
 
 /** Catmull-Rom through four values: passes through b at f=0 and c at f=1, with matching speed on both sides. */
 const crv = (a: number, b: number, c: number, d: number, f: number) =>
   0.5 * (2 * b + (c - a) * f + (2 * a - 5 * b + 4 * c - d) * f * f + (3 * b - a - 3 * c + d) * f * f * f);
 
-export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
+export async function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   opts = { ...opts };
   const gl = canvas.getContext('webgl', {
     antialias: true,
@@ -214,26 +245,27 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   const dbg = gl.getExtension('WEBGL_debug_renderer_info');
   const renderer = String(dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
   const software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer);
-  if (software) opts.still = true;
-  if (opts.pose != null) opts.still = true;
-
-  let lineProg: WebGLProgram;
-  let sparkProg: WebGLProgram;
-  try {
-    lineProg = compile(gl, LINE_VS, LINE_FS);
-    sparkProg = compile(gl, SPARK_VS, SPARK_FS);
-  } catch (e) {
-    console.warn('[ribbons]', e);
+  // Without a GPU the page keeps its static poster image: no shader compile, no CPU-rendered frame.
+  // (?pose=N, used to render that poster, still draws on any renderer.)
+  if (software && opts.pose == null && !opts.allowSoftware) {
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
     return null;
   }
+  if (opts.pose != null) opts.still = true;
+
+  const L = build(gl, LINE_VS, LINE_FS);
+  const S = build(gl, SPARK_VS, SPARK_FS);
+  if (!(await ready(gl, [L, S]))) return null;
+  const lineProg = L.p;
+  const sparkProg = S.p;
 
   const specs = opts.ribbons.slice(0, MAX_RIBBONS);
   const small = Math.min(innerWidth, innerHeight) < 700;
-  const SEGS = Math.round((opts.segments ?? 240) * (small ? 0.7 : 1) * (software ? 0.5 : 1));
+  const SEGS = Math.round((opts.segments ?? 240) * (small ? 0.7 : 1));
   const SPARKS = opts.sparkles ?? 8;
 
   // Static line buffer: (u, v, ribbon) per vertex, every segment as a pair for gl.LINES (one draw call).
-  const counts = specs.map((r) => Math.round((r.lines ?? 110) * (small ? 0.65 : 1) * (software ? 0.6 : 1)));
+  const counts = specs.map((r) => Math.round((r.lines ?? 110) * (small ? 0.65 : 1)));
   const total = counts.reduce((a, c) => a + c * SEGS * 2, 0);
   const verts = new Float32Array(total * 3);
   let k = 0;
@@ -513,6 +545,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   readScroll();
   draw(performance.now());
   start();
+  requestAnimationFrame(() => opts.onReady?.());
 
   return { start, stop };
 }
