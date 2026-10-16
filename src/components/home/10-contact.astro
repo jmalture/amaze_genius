@@ -102,6 +102,7 @@ const ok = (form.form_ok as Record<string, string>)[lang] ?? form.form_ok.de;
 
 <script>
   import { createRibbons } from '../../scripts/ribbons';
+  import { CONTACT_POSES } from '../../scripts/ribbon-poses';
 
   // Second, calmer ribbon behind the form. Created only when the section comes near the viewport.
   const canvas = document.querySelector<HTMLCanvasElement>('[data-ribbons="contact"]');
@@ -114,36 +115,11 @@ const ok = (form.form_ok as Record<string, string>)[lang] ?? form.form_ok.de;
           still: matchMedia('(prefers-reduced-motion: reduce)').matches,
           sparkles: 5,
           alpha: 0.3,
-          lines: 80,
-          span: 1.25,
+          hold: 3,
+          morph: 4,
           ribbons: [
-            {
-              y: -0.5,
-              slope: 0.4,
-              amp: 0.22,
-              freq: 3,
-              phase: 1,
-              twist: 2,
-              width: 0.55,
-              speed: 0.15,
-              hue: 0.6,
-              hueSpan: 0.3,
-              z: -0.2,
-            },
-            {
-              y: 0.5,
-              slope: -0.25,
-              amp: 0.18,
-              freq: 2.4,
-              phase: 3.5,
-              twist: 1.6,
-              width: 0.4,
-              speed: 0.12,
-              hue: 0.78,
-              hueSpan: 0.25,
-              z: 0.1,
-              gain: 0.7,
-            },
+            { poses: CONTACT_POSES, lines: 84 },
+            { poses: CONTACT_POSES, offset: 1, flipX: true, flipY: true, gain: 0.55, lines: 56, width: 0.7 },
           ],
         });
         canvas.classList.toggle('is-on', !!ok);

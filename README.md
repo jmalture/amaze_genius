@@ -12,8 +12,8 @@ endpoint for the demo-request form. Same architecture as `jmalture/sdx-website` 
 - **Sections** are components in `src/components/home/NN-<name>.astro`, each with its own CSS
   (`<style is:global>`, class prefix `ag-`) and, where needed, a small vanilla script. Order: `src/components/home/index.astro`.
 - **Design system** (tokens, buttons, chips, cards, reveal, spectrum line): `src/styles/site.css`. Brand rules: `docs/BRAND.md`.
-- **Ribbons** (the animated rainbow string-art lines in the hero and behind the contact form): `src/scripts/ribbons.ts`,
-  plain WebGL (no Three.js, ~4 KB). Without a GPU (software rendering, e.g. PageSpeed's headless Chrome) or with
+- **Ribbons** (the animated rainbow string-art lines in the hero and behind the contact form): `src/scripts/ribbons.ts`
+  (engine) and `src/scripts/ribbon-poses.ts` (the shapes, traced from the 2023 motifs), plain WebGL (no Three.js, ~4 KB). Without a GPU (software rendering, e.g. PageSpeed's headless Chrome) or with
   `prefers-reduced-motion` it draws one still frame; a watchdog freezes it on devices that can't keep up.
 - **Shared behaviour** (reveal on scroll, header, drawer, nav ink + scroll spy, spotlight cards, tilt): `src/scripts/site.ts`.
 - `src/pages/api/contact.ts` is the only server route (demo request form, stores to JSONL, then mails).
@@ -27,6 +27,13 @@ npm run build     # static pages in dist/client, server in dist/server
 npm start         # serves dist (needs a build first)
 npm run format    # Prettier
 ```
+
+## Demo for colleagues (GitHub Pages)
+
+Every push to `main` runs `.github/workflows/pages.yml`: it builds the site under `/amaze_genius/`, rewrites
+root-relative URLs (`scripts/rebase.mjs`) and pushes the result to the `gh-pages` branch.
+Demo: https://jmalture.github.io/amaze_genius/ (noindex; the contact form needs the Node server, so it doesn't
+send there). One-time setup: repo Settings → Pages → Source "Deploy from a branch", branch `gh-pages`, folder `/`.
 
 ## Deployment (Hostinger Node.js app, linked via GitHub)
 

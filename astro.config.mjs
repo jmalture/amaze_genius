@@ -3,9 +3,11 @@ import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 
-// Domain not decided yet: change `site` once it is (used for canonical, hreflang, sitemap, OG URLs).
+// Domain not decided yet: change the default `site` once it is (canonical, hreflang, sitemap, OG URLs).
+// The GitHub Pages demo build sets SITE_URL / SITE_BASE (see .github/workflows/pages.yml and scripts/rebase.mjs).
 export default defineConfig({
-  site: 'https://www.amaze-genius.de',
+  site: process.env.SITE_URL || 'https://www.amaze-genius.de',
+  base: process.env.SITE_BASE || '/',
   trailingSlash: 'always',
   // Pages are pre-rendered to static HTML; only /api/* runs on the Node server (contact form).
   output: 'static',

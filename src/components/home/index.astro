@@ -2,6 +2,7 @@
 /** The homepage sections in page order. Reorder or remove sections here. */
 import type { Lang } from '../../i18n';
 import Hero from './01-hero.astro';
+import References from './01b-references.astro';
 import Range from './02-range.astro';
 import Tour from './03-tour.astro';
 import Brand from './04-brand.astro';
@@ -15,6 +16,7 @@ const { lang } = Astro.props as { lang: Lang };
 ---
 
 <Hero lang={lang} />
+<References lang={lang} />
 <Range lang={lang} />
 <Tour lang={lang} />
 <Brand lang={lang} />

@@ -1,4 +1,4 @@
-# Status (2026-10-16)
+# Status (2026-10-16, afternoon)
 
 ## Done
 - Homepage DE (`/`), dark theme, 10 sections: hero with WebGL ribbons, Sortiment (product cards + marquee),
@@ -10,10 +10,19 @@
 - Checked at 390 / 1440 px: no horizontal overflow, no console errors. Lighthouse locally: desktop 100/97/100/100,
   mobile perf 92 (uncompressed local server); a11y contrast + button-name findings fixed afterwards.
 
-## Graphics still to come (placeholders today)
-- **Rundgang** (`03-tour.astro`): the editor mockup is HTML/CSS. Replace `.ag-ed` per step with real dark-mode
-  screenshots or short screen recordings. Source: Figma "AmazeGenius DM" → page "Fotobuch Desktop" → row
-  "000 Dark mode" (5 frames). Needs export permission / access.
+## Update 16.10. afternoon
+- **Hero ribbon v2** (`src/scripts/ribbons.ts` + `ribbon-poses.ts`): one big ribbon morphing through the six 2023
+  motifs (hero spectrum wave, yellow curl, green arc, magenta twist, rainbow S, vertical spiral), rubbery staggered
+  morphs, pinch twists, depth; a faint mirrored echo behind. `?pose=0…5` shows a single pose for tuning.
+- **Rundgang** now shows the real dark-mode screens from Figma (Fotobuch Desktop → "000 Dark mode", dm branding,
+  approved by Honza). Step 4 narrows the window into a tablet. Source PNG on Honza's PC:
+  `Documents\Jenomics\amaze-genius-assets\figma\fotobuch-desktop-dark.png`.
+- **References** band under the hero: dm Foto (link to foto.dm.de) and allcop, as text marks (no logos), approved by
+  Honza; FAQ entry added.
+- **Demo on GitHub Pages**: `.github/workflows/pages.yml` publishes every push to main to
+  https://jmalture.github.io/amaze_genius/ (noindex, contact form inactive there).
+
+## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
   calendar for a real render.
 - **Mobil** (`05-mobile.astro`): phone + laptop are CSS. Figma has "Wandkalender A4 Mobile" / "Fotobuch Mobile" screens.

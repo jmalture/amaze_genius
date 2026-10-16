@@ -1,42 +1,23 @@
 ---
 /**
- * Section "rundgang": five steps on the left, a sticky editor mockup on the right that changes with the step in view
- * (desktop: scroll-driven; mobile: the mockup sticks above the steps). Texts: home.json "tour_*".
- *
- * The mockup is built in HTML/CSS (dark mode, Amaze Genius colours) as a stand-in until real dark-mode screenshots
- * or screen recordings exist. To swap in real graphics, replace the `.ag-ed__screen` content of each step with an
- * <img>/<video> per step (keep `data-p` on each) and drop the illustration CSS.
+ * Section "rundgang": five steps on the left, a sticky app window on the right showing the real Amaze Genius
+ * dark-mode screens (Figma "AmazeGenius DM" → Fotobuch Desktop → "000 Dark mode", dm Foto branding).
+ * Desktop: scroll-driven; tablet/mobile: the window sticks above the steps. On step 4 the window narrows into a
+ * tablet for the text-editing screen. Texts: home.json "tour_*". Images: public/media/tour-*.webp.
  */
-import Icon from '../ui/Icon.astro';
 import { pick, type Lang } from '../../i18n';
 import data from '../../i18n/home.json';
 const { lang } = Astro.props as { lang: Lang };
 const t = pick(data as Record<string, any>, lang);
-const steps = t.tour_steps as { key: string; rail: string; title: string; text: string }[];
-
-// Abstract "photos" (sky, sun, two mountain layers) so the mockup needs no stock images.
-const photos = [
-  { s1: '#ffb36b', s2: '#ff5f8a', m1: '#5b2a86', m2: '#2b1650', sun: '#ffe9a3', sx: '70%', sy: '38%' },
-  { s1: '#7fd4ff', s2: '#3d7bff', m1: '#1f4fbf', m2: '#0f2a6e', sun: '#ffffff', sx: '28%', sy: '30%' },
-  { s1: '#c3f2a0', s2: '#4fc7a8', m1: '#1d7a62', m2: '#0d3f3a', sun: '#fff7c2', sx: '62%', sy: '34%' },
-  { s1: '#ffd36b', s2: '#f3940c', m1: '#b2451a', m2: '#5e1c0c', sun: '#fff3c4', sx: '40%', sy: '42%' },
-  { s1: '#e3b8ff', s2: '#9b5cff', m1: '#5a2bb0', m2: '#28125c', sun: '#ffe1fb', sx: '74%', sy: '28%' },
-  { s1: '#9ff0ff', s2: '#00c3d9', m1: '#0b6d8c', m2: '#063845', sun: '#ffffff', sx: '22%', sy: '40%' },
+const steps = t.tour_steps as { key: string; title: string; text: string }[];
+const alts = t.tour_alt as string[];
+const shots = [
+  { src: 'tour-1-fotos', w: [1600, 960], h: 857 },
+  { src: 'tour-2-seiten', w: [1600, 960], h: 857 },
+  { src: 'tour-3-bearbeiten', w: [1600, 960], h: 990 },
+  { src: 'tour-4-text', w: [1024, 720], h: 746, tablet: true },
+  { src: 'tour-5-vorschau', w: [1600, 960], h: 857 },
 ];
-const ph = (i: number) => {
-  const p = photos[i % photos.length];
-  return `--s1:${p.s1};--s2:${p.s2};--m1:${p.m1};--m2:${p.m2};--sun:${p.sun};--sx:${p.sx};--sy:${p.sy}`;
-};
-const rail = [
-  { icon: 'photo', label: 'Fotos', step: 0 },
-  { icon: 'layout', label: 'Layout', step: 1 },
-  { icon: 'background', label: 'Hintergrund', step: 2 },
-  { icon: 'clipart', label: 'Cliparts', step: -1 },
-  { icon: 'pages', label: 'Buch', step: 4 },
-  { icon: 'filter', label: 'Bearbeiten', step: 3 },
-] as const;
-const swatches = ['#ffffff', '#f6efe6', '#fde2e4', '#dff3ff', '#e9ffe1', '#1c1c25', '#0041F6', '#FF00D8'];
-const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolor', 'Leuchtkraft'];
 ---
 
 <section class="ag-section ag-tour" id="rundgang">
@@ -69,175 +50,28 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
       </ol>
 
       <div class="ag-tour__stage">
-        <div class="ag-tour__fit" data-fit>
-          <div class="ag-ed" data-ed data-step="0" aria-hidden="true">
-            <div class="ag-ed__top">
-              <div class="ag-ed__tools">
-                <span>
-                  <Icon name="external" size={15} />
-                </span>
-                <span>
-                  <Icon name="save" size={15} />
-                </span>
-                <span>
-                  <Icon name="eye" size={15} />
-                </span>
-                <i></i>
-                <span>
-                  <Icon name="undo" size={15} />
-                </span>
-                <span class="ag-ed__redo">
-                  <Icon name="undo" size={15} />
-                </span>
-              </div>
-              <div class="ag-ed__title">
-                <strong>{t.tour_mock_product}</strong>
-                <small>{t.tour_mock_variant}</small>
-              </div>
-              <div class="ag-ed__buy">
-                <span class="ag-ed__price">{t.tour_mock_price}</span>
-                <span class="ag-ed__cart">
-                  <Icon name="cart" size={14} />
-                  {t.tour_mock_cart}
-                  <b class="ag-ed__badge">1</b>
-                </span>
-              </div>
+        <div class="ag-tour__fit">
+          <div class="ag-shot" data-shot data-step="0">
+            <div class="ag-shot__bar" aria-hidden="true">
+              <i></i>
+              <i></i>
+              <i></i>
+              <span class="ag-shot__url">{t.tour_mock_url}</span>
             </div>
-
-            <div class="ag-ed__body">
-              <div class="ag-ed__rail">
-                {rail.map((r) => (
-                  <span class="ag-ed__railbtn" data-for={r.step}>
-                    <Icon name={r.icon} size={17} />
-                    <small>{r.label}</small>
-                  </span>
-                ))}
-              </div>
-
-              <div class="ag-ed__panel">
-                <div class="ag-ed__pane" data-p="0">
-                  <div class="ag-ed__drop">
-                    <Icon name="upload" size={18} />
-                    {t.tour_mock_upload}
-                  </div>
-                  <div class="ag-ed__thumbs">
-                    {[0, 1, 2, 3, 4, 5, 1, 3, 0].map((p, i) => (
-                      <span class="ag-ph" style={`${ph(p)};--d:${i}`} />
-                    ))}
-                  </div>
-                </div>
-                <div class="ag-ed__pane" data-p="1">
-                  <p class="ag-ed__label">Layouts</p>
-                  <div class="ag-ed__layouts">
-                    {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map((l, i) => (
-                      <span class={`ag-ed__lay ${l}`} style={`--d:${i}`}>
-                        <i />
-                        <i />
-                        <i />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div class="ag-ed__pane" data-p="2">
-                  <p class="ag-ed__label">Einfarbig</p>
-                  <div class="ag-ed__swatches">
-                    {swatches.map((c, i) => (
-                      <span style={`background:${c};--d:${i}`} />
-                    ))}
-                  </div>
-                  <p class="ag-ed__label">Aquarell</p>
-                  <div class="ag-ed__aqua">
-                    <span style="--a:#ffb3c7;--b:#ffe2a8" />
-                    <span style="--a:#a8d8ff;--b:#d6b8ff" />
-                    <span style="--a:#b8ffd9;--b:#a8f0ff" />
-                  </div>
-                  <p class="ag-ed__label">Cliparts</p>
-                  <div class="ag-ed__cliparts">
-                    <Icon name="clipart" size={20} />
-                    <Icon name="sparkle" size={20} />
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                      <path
-                        d="M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                      ></path>
-                    </svg>
-                    <Icon name="sun" size={20} />
-                  </div>
-                </div>
-                <div class="ag-ed__pane" data-p="3">
-                  <p class="ag-ed__label">Bildauswahl</p>
-                  <div class="ag-ed__filters">
-                    {filters.map((f, i) => (
-                      <span class={`f${i}`} style={`--d:${i}`}>
-                        <i class="ag-ph" style={ph(0)} />
-                        <small>{f}</small>
-                      </span>
-                    ))}
-                  </div>
-                  <div class="ag-ed__slider">
-                    <small>Transparenz</small>
-                    <i style="--v:.82"></i>
-                  </div>
-                  <div class="ag-ed__slider">
-                    <small>Rahmenstärke</small>
-                    <i style="--v:.3"></i>
-                  </div>
-                </div>
-                <div class="ag-ed__pane" data-p="4">
-                  <p class="ag-ed__label">Buch-Einstellungen</p>
-                  <div class="ag-ed__pages">
-                    <span>
-                      <small>Seitenzahl</small>
-                      <strong>{t.tour_mock_pages}</strong>
-                    </span>
-                    <b>–</b>
-                    <b>+</b>
-                  </div>
-                  <div class="ag-ed__mini">
-                    {[0, 1, 2, 3].map((i) => (
-                      <span style={`--d:${i}`}>
-                        <i class="ag-ph" style={ph(i + 1)} />
-                        <i class="ag-ph" style={ph(i + 2)} />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div class="ag-ed__canvas">
-                <div class="ag-ed__spread">
-                  <div class="ag-ed__page ag-ed__page--l">
-                    <span class="ag-ed__blob" />
-                    <span class="ag-ed__slot a">
-                      <i class="ag-ph" style={ph(1)} />
-                    </span>
-                    <span class="ag-ed__slot b">
-                      <i class="ag-ph" style={ph(2)} />
-                    </span>
-                    <span class="ag-ed__slot c">
-                      <i class="ag-ph" style={ph(3)} />
-                    </span>
-                  </div>
-                  <div class="ag-ed__page ag-ed__page--r">
-                    <span class="ag-ed__blob" />
-                    <span class="ag-ed__slot d is-sel">
-                      <i class="ag-ph" style={ph(0)} />
-                      <em class="ag-ed__handles" />
-                    </span>
-                    <span class="ag-ed__clip">
-                      <Icon name="clipart" size={26} />
-                    </span>
-                    <span class="ag-ed__caption">Sommer 2026</span>
-                  </div>
-                </div>
-                <div class="ag-ed__strip">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <span class={i === 1 ? 'is-on' : ''} />
-                  ))}
-                </div>
-              </div>
+            <div class="ag-shot__screen">
+              {shots.map((sh, i) => (
+                <picture class={`ag-shot__img${sh.tablet ? ' is-tablet' : ''}`} data-i={i}>
+                  <source media="(max-width: 700px)" srcset={`/media/${sh.src}-${sh.w[1]}.webp`} />
+                  <img
+                    src={`/media/${sh.src}-${sh.w[0]}.webp`}
+                    alt={alts[i]}
+                    width={sh.w[0]}
+                    height={sh.h}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              ))}
             </div>
           </div>
         </div>
@@ -254,14 +88,12 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-tour]');
-  const ed = root?.querySelector<HTMLElement>('[data-ed]');
-  const fit = root?.querySelector<HTMLElement>('[data-fit]');
-  if (root && ed && fit) {
+  const shot = root?.querySelector<HTMLElement>('[data-shot]');
+  if (root && shot) {
     const steps = [...root.querySelectorAll<HTMLElement>('.ag-tour__step')];
     const dots = [...root.querySelectorAll<HTMLElement>('[data-dot]')];
     const set = (n: number) => {
-      ed.dataset.step = String(n);
-      for (let k = 1; k <= 4; k++) ed.classList.toggle(`is-s${k}`, n >= k);
+      shot.dataset.step = String(n);
       steps.forEach((s, i) => {
         s.classList.toggle('is-active', i === n);
         s.toggleAttribute('aria-current', i === n);
@@ -270,7 +102,7 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
       dots.forEach((d, i) => d.classList.toggle('is-on', i === n));
     };
     // The step crossing the activation band becomes active. Desktop: the middle of the viewport.
-    // Tablet/mobile: the mockup sticks at the top, so the band sits just below it (otherwise the active text hides).
+    // Tablet/mobile: the window sticks at the top, so the band sits just below it (otherwise the active text hides).
     const stage = root.querySelector<HTMLElement>('.ag-tour__stage')!;
     let io: IntersectionObserver | null = null;
     const observe = () => {
@@ -291,26 +123,26 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
     };
     observe();
     let rt = 0;
-    addEventListener('resize', () => {
+    new ResizeObserver(() => {
       clearTimeout(rt);
-      rt = window.setTimeout(observe, 200);
-    });
+      rt = window.setTimeout(observe, 120);
+    }).observe(stage);
     steps.forEach((s) =>
       s.querySelector('button')?.addEventListener('click', () => {
         s.scrollIntoView({ behavior: 'smooth', block: 'center' });
         set(Number(s.dataset.step));
       }),
     );
+    // Images are lazy: start loading all five once the section is near, so step changes never show a blank.
+    new IntersectionObserver(
+      ([e], obs) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        shot.querySelectorAll('img').forEach((img) => (img.loading = 'eager'));
+      },
+      { rootMargin: '600px' },
+    ).observe(shot);
     set(0);
-
-    // Scale the fixed-size mockup (880×560) to the stage width.
-    new ResizeObserver(([e]) => {
-      const s = Math.min(1, e.contentRect.width / 880);
-      fit.style.setProperty('--s', s.toFixed(4));
-      // the stage height changed: move the activation band with it
-      clearTimeout(rt);
-      rt = window.setTimeout(observe, 60);
-    }).observe(fit);
   }
 </script>
 
@@ -394,9 +226,8 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
     top: calc(50vh - 300px + var(--ag-header-h) / 2);
   }
   .ag-tour__fit {
-    --s: 1;
     position: relative;
-    height: calc(560px * var(--s));
+    aspect-ratio: 1920 / 1068;
   }
   .ag-tour__fit::before {
     /* coloured glow behind the app window */
@@ -434,654 +265,117 @@ const filters = ['Original', 'Schwarz/Weiß', 'Sepia', 'Invertiert', 'Technicolo
     color: var(--ag-dim);
   }
 
-  /* ---------- The editor mockup (design size 880×560, scaled by --s) ---------- */
-  .ag-ed {
-    --acc: var(--ag-blue);
-    --acc-l: var(--ag-blue-l);
+  /* ---------- App window with the real screens ---------- */
+  .ag-shot {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 880px;
-    height: 560px;
-    transform: scale(var(--s));
-    transform-origin: 0 0;
+    inset: 0 auto 0 50%;
+    width: 100%;
+    translate: -50% 0;
     display: grid;
-    grid-template-rows: 52px 1fr;
-    border-radius: 18px;
-    background: #121218;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    grid-template-rows: 40px 1fr;
+    border-radius: 16px;
+    background: #262626;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow:
       0 40px 100px rgba(0, 0, 0, 0.6),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
     overflow: hidden;
-    font-family: var(--ag-font);
-    color: #e9e9f0;
-    font-size: 12px;
-    line-height: 1.3;
+    transition:
+      width 0.9s var(--ag-ease-io),
+      border-radius 0.9s var(--ag-ease-io);
   }
-  .ag-ed__top {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+  /* step 4: the window becomes a tablet */
+  .ag-shot[data-step='3'] {
+    width: 74%;
+    border-radius: 28px;
+  }
+  .ag-shot__bar {
+    display: flex;
     align-items: center;
+    gap: 7px;
     padding: 0 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: #141414;
   }
-  .ag-ed__tools {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #9a9aac;
+  .ag-shot__bar i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a3a;
   }
-  .ag-ed__tools span {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
+  .ag-shot__bar i:nth-child(1) {
+    background: #ff5f57;
+  }
+  .ag-shot__bar i:nth-child(2) {
+    background: #febc2e;
+  }
+  .ag-shot__bar i:nth-child(3) {
+    background: #28c840;
+  }
+  .ag-shot__url {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 4px 14px;
     border-radius: 8px;
-  }
-  .ag-ed__tools i {
-    width: 1px;
-    height: 18px;
-    margin: 0 4px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .ag-ed__redo svg {
-    scale: -1 1;
-  }
-  .ag-ed__title {
-    text-align: center;
-  }
-  .ag-ed__title strong {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .ag-ed__title small {
-    color: #8b8b9e;
-    font-size: 11px;
-  }
-  .ag-ed__buy {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-  }
-  .ag-ed__price {
-    padding: 7px 12px;
-    border-radius: 999px;
     background: rgba(255, 255, 255, 0.07);
-    font-weight: 600;
-    transition: scale var(--ag-med) var(--ag-spring);
-  }
-  .ag-ed__cart {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: var(--acc);
-    color: #fff;
-    font-weight: 600;
-    transition:
-      box-shadow var(--ag-med),
-      background-color var(--ag-med);
-  }
-  .ag-ed__badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    display: grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--ag-magenta);
-    font-size: 10px;
-    scale: 0;
-    transition: scale var(--ag-med) var(--ag-spring);
-  }
-
-  .ag-ed__body {
-    display: grid;
-    grid-template-columns: 70px 220px 1fr;
-    min-height: 0;
-  }
-  .ag-ed__rail {
-    display: grid;
-    align-content: start;
-    gap: 6px;
-    padding: 12px 8px;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .ag-ed__railbtn {
-    display: grid;
-    justify-items: center;
-    gap: 4px;
-    padding: 8px 0 6px;
-    border-radius: 10px;
-    color: #8b8b9e;
-    transition:
-      background-color var(--ag-med),
-      color var(--ag-med);
-  }
-  .ag-ed__railbtn small {
-    font-size: 9.5px;
-  }
-  .ag-ed[data-step='0'] .ag-ed__railbtn[data-for='0'],
-  .ag-ed[data-step='1'] .ag-ed__railbtn[data-for='1'],
-  .ag-ed[data-step='2'] .ag-ed__railbtn[data-for='2'],
-  .ag-ed[data-step='3'] .ag-ed__railbtn[data-for='3'],
-  .ag-ed[data-step='4'] .ag-ed__railbtn[data-for='4'] {
-    background: color-mix(in srgb, var(--acc) 22%, transparent);
-    color: #fff;
-  }
-
-  .ag-ed__panel {
-    position: relative;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-    background: #15151d;
-  }
-  .ag-ed__pane {
-    position: absolute;
-    inset: 0;
-    padding: 14px;
-    opacity: 0;
-    visibility: hidden;
-    translate: -10px 0;
-    transition:
-      opacity var(--ag-med) var(--ag-ease),
-      translate var(--ag-med) var(--ag-ease),
-      visibility 0s linear var(--ag-med);
-  }
-  .ag-ed[data-step='0'] [data-p='0'],
-  .ag-ed[data-step='1'] [data-p='1'],
-  .ag-ed[data-step='2'] [data-p='2'],
-  .ag-ed[data-step='3'] [data-p='3'],
-  .ag-ed[data-step='4'] [data-p='4'] {
-    opacity: 1;
-    visibility: visible;
-    translate: 0 0;
-    transition-delay: 0s;
-  }
-  .ag-ed__label {
-    margin: 4px 0 8px;
     font-size: 11px;
-    font-weight: 600;
-    color: #a9a9bb;
+    color: #a8a8b4;
+    translate: -20px 0;
   }
-  .ag-ed__label:not(:first-child) {
-    margin-top: 14px;
-  }
-  .ag-ed__drop {
-    display: grid;
-    justify-items: center;
-    gap: 6px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    border: 1.5px dashed color-mix(in srgb, var(--acc-l) 60%, transparent);
-    color: var(--acc-l);
-    font-weight: 600;
-  }
-  .ag-ed__thumbs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  .ag-ed__thumbs .ag-ph {
-    aspect-ratio: 1;
-    border-radius: 6px;
-  }
-  /* pop-in of the uploaded photos and other pane items when their pane opens */
-  .ag-ed__pane > * > * {
-    opacity: 0;
-    scale: 0.7;
-    transition:
-      opacity 0.4s var(--ag-ease),
-      scale 0.5s var(--ag-spring);
-  }
-  .ag-ed[data-step='0'] [data-p='0'] > * > *,
-  .ag-ed[data-step='1'] [data-p='1'] > * > *,
-  .ag-ed[data-step='2'] [data-p='2'] > * > *,
-  .ag-ed[data-step='3'] [data-p='3'] > * > *,
-  .ag-ed[data-step='4'] [data-p='4'] > * > * {
-    opacity: 1;
-    scale: 1;
-    transition-delay: calc(var(--d, 0) * 70ms + 150ms);
-  }
-  .ag-ed__layouts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .ag-ed__lay {
-    display: grid;
-    gap: 3px;
-    padding: 6px;
-    aspect-ratio: 1.45;
-    border-radius: 8px;
-    background: #22222c;
-    border: 1.5px solid transparent;
-  }
-  .ag-ed__lay i {
-    border-radius: 2px;
-    background: #3a3a48;
-  }
-  .ag-ed__lay.l1 {
-    grid-template: 1fr 1fr / 1.3fr 1fr;
-  }
-  .ag-ed__lay.l1 i:first-child {
-    grid-row: span 2;
-  }
-  .ag-ed__lay.l2 {
-    grid-template: 1fr / 1fr 1fr 1fr;
-  }
-  .ag-ed__lay.l3 {
-    grid-template: 1fr 1fr / 1fr 1fr;
-  }
-  .ag-ed__lay.l3 i:first-child {
-    grid-column: span 2;
-  }
-  .ag-ed__lay.l4 {
-    grid-template: 1fr 1fr / 1fr 1.3fr;
-  }
-  .ag-ed__lay.l4 i:last-child {
-    grid-row: 1 / span 2;
-    grid-column: 2;
-  }
-  .ag-ed__lay.l5 {
-    grid-template: 1fr / 1fr;
-  }
-  .ag-ed__lay.l5 i:not(:first-child) {
-    display: none;
-  }
-  .ag-ed__lay.l6 {
-    grid-template: 1fr 1fr 1fr / 1fr;
-  }
-  .ag-ed.is-s1 .ag-ed__lay.l4 {
-    border-color: var(--acc-l);
-    background: color-mix(in srgb, var(--acc) 18%, #22222c);
-  }
-  .ag-ed__swatches {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-  }
-  .ag-ed__swatches span {
-    aspect-ratio: 1;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  }
-  .ag-ed__swatches span:nth-child(2) {
-    box-shadow:
-      0 0 0 2px #121218,
-      0 0 0 3.5px var(--acc-l);
-  }
-  .ag-ed__aqua {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  .ag-ed__aqua span {
-    aspect-ratio: 1.3;
-    border-radius: 8px;
-    background:
-      radial-gradient(60% 50% at 30% 40%, var(--a), transparent 70%),
-      radial-gradient(60% 50% at 70% 60%, var(--b), transparent 70%), #fbf8f4;
-  }
-  .ag-ed__cliparts {
-    display: flex;
-    gap: 14px;
-    color: #d9d9e6;
-  }
-  .ag-ed__filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 6px;
-  }
-  .ag-ed__filters span {
-    display: grid;
-    gap: 4px;
-  }
-  .ag-ed__filters .ag-ph {
-    aspect-ratio: 1.5;
-    border-radius: 6px;
-    border: 1.5px solid transparent;
-  }
-  .ag-ed__filters small {
-    font-size: 9.5px;
-    color: #a9a9bb;
-  }
-  .ag-ed__filters .f1 .ag-ph {
-    filter: grayscale(1);
-  }
-  .ag-ed__filters .f2 .ag-ph {
-    filter: sepia(0.9);
-  }
-  .ag-ed__filters .f3 .ag-ph {
-    filter: invert(1);
-  }
-  .ag-ed__filters .f4 .ag-ph {
-    filter: saturate(2.2) hue-rotate(-20deg);
-  }
-  .ag-ed__filters .f5 .ag-ph {
-    filter: brightness(1.25) saturate(1.4);
-  }
-  .ag-ed.is-s3 .ag-ed__filters .f2 .ag-ph {
-    border-color: var(--acc-l);
-  }
-  .ag-ed__slider {
-    margin-top: 12px;
-  }
-  .ag-ed__slider small {
-    font-size: 10px;
-    color: #a9a9bb;
-  }
-  .ag-ed__slider i {
+  .ag-shot__screen {
     position: relative;
-    display: block;
-    height: 4px;
-    margin-top: 6px;
-    border-radius: 4px;
-    background: #2c2c38;
-  }
-  .ag-ed__slider i::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: calc(var(--v) * 100%);
-    border-radius: 4px;
-    background: var(--acc);
-  }
-  .ag-ed__slider i::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: calc(var(--v) * 100%);
-    width: 12px;
-    height: 12px;
-    translate: -50% -50%;
-    border-radius: 50%;
-    background: #fff;
-  }
-  .ag-ed__pages {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    align-items: center;
-    gap: 6px;
-  }
-  .ag-ed__pages small {
-    display: block;
-    font-size: 10px;
-    color: #8b8b9e;
-  }
-  .ag-ed__pages strong {
-    font-size: 14px;
-  }
-  .ag-ed__pages b {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: #24242e;
-    font-size: 14px;
-  }
-  .ag-ed__mini {
-    display: grid;
-    gap: 8px;
-    margin-top: 14px;
-  }
-  .ag-ed__mini span {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    padding: 4px;
-    border-radius: 6px;
-    background: #f4f1ec;
-  }
-  .ag-ed__mini .ag-ph {
-    aspect-ratio: 1.3;
-  }
-
-  /* Canvas with the photo-book spread */
-  .ag-ed__canvas {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    gap: 12px;
-    padding: 26px 26px 14px;
-    background:
-      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.06) 1px, transparent 0) 0 0 / 16px 16px,
-      #0e0e13;
-    min-width: 0;
-  }
-  .ag-ed__spread {
-    align-self: center;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    aspect-ratio: 1.45;
-    border-radius: 3px;
-    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
     overflow: hidden;
+    background: #262626;
   }
-  .ag-ed__page {
-    position: relative;
-    display: grid;
-    gap: 6px;
-    padding: 12px;
-    background: #ffffff;
-    transition:
-      background-color 0.8s var(--ag-ease),
-      grid-template-columns 0.8s var(--ag-ease),
-      grid-template-rows 0.8s var(--ag-ease);
-    overflow: hidden;
-  }
-  .ag-ed__page--l {
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
-    grid-template: 1fr 1fr / 1fr 1fr;
-    grid-template-areas: 'a b' 'c c';
-  }
-  .ag-ed__page--r {
-    grid-template: 1fr / 1fr;
-    grid-template-areas: 'd';
-    padding: 18px 18px 40px;
-  }
-  .ag-ed.is-s1 .ag-ed__page--l {
-    grid-template: 1fr 1fr / 1fr 1.35fr;
-    grid-template-areas: 'a c' 'b c';
-  }
-  .ag-ed__slot {
-    position: relative;
-    z-index: 1;
-    min-height: 0;
-    border-radius: 2px;
-    background: #ececf1;
-    overflow: hidden;
-  }
-  .ag-ed__slot.a {
-    grid-area: a;
-  }
-  .ag-ed__slot.b {
-    grid-area: b;
-  }
-  .ag-ed__slot.c {
-    grid-area: c;
-  }
-  .ag-ed__slot.d {
-    grid-area: d;
-    overflow: visible;
-  }
-  .ag-ed__slot .ag-ph {
+  .ag-shot__img {
     position: absolute;
     inset: 0;
     opacity: 0;
-    scale: 1.15;
+    scale: 1.03;
     transition:
       opacity 0.6s var(--ag-ease),
-      scale 0.9s var(--ag-ease),
-      filter 0.8s var(--ag-ease);
+      scale 0.9s var(--ag-ease);
   }
-  /* Step 1 onwards: the uploaded photos land in the slots */
-  .ag-ed[data-step='0'] .ag-ed__slot .ag-ph {
-    transition-delay: 0s;
+  .ag-shot__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
   }
-  .ag-ed.is-s1 .ag-ed__slot .ag-ph {
+  .ag-shot__img.is-tablet img {
+    object-fit: cover;
+    object-position: center;
+  }
+  .ag-shot[data-step='0'] [data-i='0'],
+  .ag-shot[data-step='1'] [data-i='1'],
+  .ag-shot[data-step='2'] [data-i='2'],
+  .ag-shot[data-step='3'] [data-i='3'],
+  .ag-shot[data-step='4'] [data-i='4'] {
     opacity: 1;
     scale: 1;
-  }
-  .ag-ed.is-s1 .ag-ed__slot.b .ag-ph {
-    transition-delay: 0.12s;
-  }
-  .ag-ed.is-s1 .ag-ed__slot.c .ag-ph {
-    transition-delay: 0.24s;
-  }
-  .ag-ed.is-s1 .ag-ed__slot.d .ag-ph {
-    transition-delay: 0.36s;
-  }
-  /* empty slots before the photos land: a faint placeholder mountain, like the real editor */
-  .ag-ed__slot::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: #d9d9e2;
-    clip-path: polygon(10% 85%, 35% 50%, 52% 68%, 70% 42%, 90% 85%);
-    opacity: 0.8;
-  }
-  .ag-ed__slot.d .ag-ph {
-    border-radius: 2px;
-  }
-  .ag-ed__handles {
-    position: absolute;
-    inset: -5px;
-    border: 1.5px solid var(--acc-l);
-    border-radius: 3px;
-    opacity: 0;
-    transition: opacity var(--ag-med);
-  }
-  .ag-ed__handles::before,
-  .ag-ed__handles::after {
-    content: '';
-    position: absolute;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #fff;
-    border: 1.5px solid var(--acc-l);
-  }
-  .ag-ed__handles::before {
-    top: -6px;
-    left: -6px;
-  }
-  .ag-ed__handles::after {
-    right: -6px;
-    bottom: -6px;
-  }
-  .ag-ed[data-step='3'] .ag-ed__handles {
-    opacity: 1;
-  }
-  .ag-ed.is-s3 .ag-ed__slot.d .ag-ph {
-    filter: sepia(0.9);
-  }
-  .ag-ed__caption {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 12px;
-    text-align: center;
-    font-family: var(--ag-head);
-    font-size: 15px;
-    font-weight: 500;
-    color: #2a2a35;
-  }
-  /* Step 2: background and clipart */
-  .ag-ed__blob {
-    position: absolute;
-    inset: -20%;
-    background:
-      radial-gradient(40% 35% at 30% 30%, #ffd2dd, transparent 70%),
-      radial-gradient(40% 35% at 70% 70%, #ffe7b8, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.9s var(--ag-ease);
-  }
-  .ag-ed.is-s2 .ag-ed__page {
-    background-color: #f6efe6;
-  }
-  .ag-ed.is-s2 .ag-ed__blob {
-    opacity: 1;
-  }
-  .ag-ed__clip {
-    position: absolute;
-    z-index: 2;
-    top: 8px;
-    right: 8px;
-    color: #f3940c;
-    opacity: 0;
-    scale: 0.2;
-    rotate: -40deg;
-    transition:
-      opacity 0.4s,
-      scale 0.7s var(--ag-spring),
-      rotate 0.7s var(--ag-spring);
-  }
-  .ag-ed.is-s2 .ag-ed__clip {
-    opacity: 1;
-    scale: 1;
-    rotate: 0deg;
-  }
-  .ag-ed__strip {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-  }
-  .ag-ed__strip span {
-    width: 46px;
-    height: 30px;
-    border-radius: 3px;
-    background: #2a2a34;
-  }
-  .ag-ed__strip span.is-on {
-    box-shadow: 0 0 0 2px var(--acc-l);
-  }
-  /* Step 4: price + cart */
-  .ag-ed[data-step='4'] .ag-ed__price {
-    scale: 1.08;
-  }
-  .ag-ed[data-step='4'] .ag-ed__cart {
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--acc) 35%, transparent),
-      0 10px 26px color-mix(in srgb, var(--acc) 55%, transparent);
-  }
-  .ag-ed[data-step='4'] .ag-ed__badge {
-    scale: 1;
-    transition-delay: 0.5s;
   }
 
-  /* Abstract photo: sky gradient, sun, two mountain layers */
-  .ag-ph {
-    position: relative;
-    display: block;
-    background:
-      radial-gradient(circle at var(--sx) var(--sy), var(--sun) 0 7%, transparent 7.5%),
-      linear-gradient(180deg, var(--s1), var(--s2));
-    overflow: hidden;
+  @media (max-width: 700px) {
+    .ag-shot {
+      grid-template-rows: 24px 1fr;
+      border-radius: 10px;
+    }
+    .ag-shot[data-step='3'] {
+      border-radius: 16px;
+    }
+    .ag-shot__bar {
+      gap: 5px;
+      padding: 0 9px;
+    }
+    .ag-shot__bar i {
+      width: 7px;
+      height: 7px;
+    }
+    .ag-shot__url {
+      padding: 2px 10px;
+      font-size: 9px;
+      border-radius: 6px;
+    }
   }
-  .ag-ph::before,
-  .ag-ph::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-  }
-  .ag-ph::before {
-    background: var(--m1);
-    clip-path: polygon(0 72%, 18% 50%, 34% 62%, 52% 38%, 70% 56%, 86% 46%, 100% 60%, 100% 100%, 0 100%);
-    opacity: 0.85;
-  }
-  .ag-ph::after {
-    background: var(--m2);
-    clip-path: polygon(0 86%, 22% 70%, 40% 80%, 62% 64%, 80% 78%, 100% 70%, 100% 100%, 0 100%);
-  }
-
   @media (max-width: 960px) {
     .ag-tour__grid {
       grid-template-columns: 1fr;
