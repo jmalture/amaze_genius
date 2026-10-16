@@ -1,0 +1,170 @@
+---
+/**
+ * Section "ablauf": four steps on a line that fills with the spectrum as you scroll (scroll-driven animation where
+ * supported, otherwise a reveal). Texts: home.json "flow_*".
+ */
+import { pick, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const steps = t.flow_steps as { title: string; text: string }[];
+---
+
+<section class="ag-section ag-flow" id="ablauf">
+  <div class="ag-wrap">
+    <div class="ag-head">
+      <p class="ag-kicker" data-reveal>
+        {t.flow_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.flow_title_a} <span class="ag-grad">{t.flow_title_b}</span>
+      </h2>
+      <p class="ag-lead" data-reveal style="--i:2">
+        {t.flow_lead}
+      </p>
+    </div>
+
+    <ol class="ag-flow__list" data-flow>
+      <li class="ag-flow__line" aria-hidden="true">
+        <span></span>
+      </li>
+      {steps.map((s, i) => (
+        <li class="ag-flow__step" data-reveal style={`--i:${i}`}>
+          <span class="ag-flow__node">
+            <b>{i + 1}</b>
+          </span>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style is:global>
+  .ag-flow__list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(20px, 3vw, 40px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-flow__line {
+    position: absolute;
+    left: 28px;
+    right: 0;
+    top: 27px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .ag-flow__line span {
+    position: absolute;
+    inset: 0;
+    background: var(--ag-spectrum);
+    transform-origin: 0 50%;
+  }
+  @supports (animation-timeline: view()) {
+    .ag-flow__line span {
+      animation: ag-fill linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 55%;
+    }
+    @keyframes ag-fill {
+      from {
+        scale: 0 1;
+      }
+      to {
+        scale: 1 1;
+      }
+    }
+  }
+  .ag-flow__step {
+    position: relative;
+  }
+  .ag-flow__node {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ag-bg);
+    border: 1px solid var(--ag-line-2);
+  }
+  .ag-flow__node::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: var(--ag-cool);
+    opacity: 0.9;
+  }
+  .ag-flow__node b {
+    position: relative;
+    font-family: var(--ag-head);
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .ag-flow__step:nth-child(3) .ag-flow__node::before {
+    background: linear-gradient(135deg, #00c3d9, #0041f6);
+  }
+  .ag-flow__step:nth-child(4) .ag-flow__node::before {
+    background: linear-gradient(135deg, #8cff06, #00c3d9);
+  }
+  .ag-flow__step:nth-child(5) .ag-flow__node::before {
+    background: linear-gradient(135deg, #ffe000, #f81200);
+  }
+  .ag-flow__step h3 {
+    margin-top: 22px;
+    font-size: var(--ag-h3);
+    font-weight: 500;
+  }
+  .ag-flow__step p {
+    margin-top: 8px;
+    color: var(--ag-muted);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 860px) {
+    .ag-flow__list {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .ag-flow__line {
+      left: 27px;
+      right: auto;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      height: auto;
+    }
+    .ag-flow__line span {
+      transform-origin: 50% 0;
+    }
+    @supports (animation-timeline: view()) {
+      @keyframes ag-fill {
+        from {
+          scale: 1 0;
+        }
+        to {
+          scale: 1 1;
+        }
+      }
+    }
+    .ag-flow__step {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      column-gap: 20px;
+    }
+    .ag-flow__node {
+      grid-row: span 2;
+    }
+    .ag-flow__step h3 {
+      margin-top: 12px;
+    }
+  }
+</style>

@@ -1,0 +1,340 @@
+---
+/**
+ * Site header: logo, anchor navigation (the homepage is a guided tour), language switch (only once a second
+ * language is live) and the demo CTA. Transparent over the hero, dark glass once scrolled, hides on scroll down.
+ * Below 1000px a full-screen drawer. Behaviour lives in src/scripts/site.ts.
+ */
+import Icon from './ui/Icon.astro';
+import { LANGS, LIVE_LANGS, pick, type Lang } from '../i18n';
+import chrome from '../i18n/chrome.json';
+
+interface Props {
+  lang: Lang;
+  alternates: Partial<Record<Lang, string>>;
+}
+const { lang, alternates } = Astro.props;
+const t = pick(chrome as Record<string, any>, lang);
+const nav = t.h_nav as [string, string][];
+const home = lang === 'de' ? '/' : `/${lang}/`;
+const langs = LANGS.filter((l) => LIVE_LANGS.includes(l.code));
+---
+
+<header class="ag-hd" data-header>
+  <div class="ag-hd__bar ag-wrap">
+    <a class="ag-hd__logo" href={home} aria-label={t.h_home_aria}>
+      <img src="/media/ag-logo-light.webp" alt="Amaze Genius" width="440" height="66" />
+    </a>
+
+    <nav class="ag-nav" aria-label={t.h_nav_label}>
+      <ul class="ag-nav__list" data-nav>
+        {nav.map(([label, href]) => (
+          <li>
+            <a class="ag-nav__link" href={href} data-nav-link={href.split('#')[1]}>
+              {label}
+            </a>
+          </li>
+        ))}
+        <li class="ag-nav__ink" aria-hidden="true"></li>
+      </ul>
+    </nav>
+
+    <div class="ag-hd__tools">
+      {langs.length > 1 && (
+        <div class="ag-lang" role="group" aria-label={t.h_lang_label}>
+          {langs.map((l) => (
+            <a
+              href={alternates[l.code] ?? (l.code === 'de' ? '/' : `/${l.code}/`)}
+              hreflang={l.code}
+              lang={l.code}
+              aria-current={l.code === lang ? 'true' : undefined}
+              title={l.name}
+            >
+              {l.short}
+            </a>
+          ))}
+        </div>
+      )}
+      <a class="ag-btn ag-btn--sm ag-hd__cta" href={t.h_cta_href}>
+        {t.h_cta}
+        <Icon name="arrow" size={18} />
+      </a>
+      <button class="ag-burger" aria-expanded="false" aria-controls="ag-drawer" aria-label={t.h_burger} data-burger>
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="ag-drawer" id="ag-drawer" data-drawer>
+    <div class="ag-drawer__inner ag-wrap">
+      <ul>
+        {nav.map(([label, href], i) => (
+          <li style={`--i:${i}`}>
+            <a href={href}>
+              <span class="ag-drawer__no">{String(i + 1).padStart(2, '0')}</span>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a class="ag-btn" href={t.h_cta_href}>
+        {t.h_cta}
+        <Icon name="arrow" size={18} />
+      </a>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  .ag-hd {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    transition: translate var(--ag-med) var(--ag-ease);
+  }
+  .ag-hd::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 9, 12, 0.66);
+    backdrop-filter: saturate(1.4) blur(18px);
+    -webkit-backdrop-filter: saturate(1.4) blur(18px);
+    border-bottom: 1px solid var(--ag-line);
+    opacity: 0;
+    transition: opacity var(--ag-med) var(--ag-ease);
+  }
+  .ag-hd.is-scrolled::before,
+  .ag-hd.is-open::before {
+    opacity: 1;
+  }
+  .ag-hd.is-open::before {
+    background: var(--ag-bg);
+  }
+  .ag-hd.is-hidden:not(.is-open) {
+    translate: 0 -100%;
+  }
+  .ag-hd__bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: var(--ag-header-h);
+  }
+  .ag-hd__logo {
+    flex: none;
+    transition: opacity var(--ag-fast);
+  }
+  .ag-hd__logo img {
+    width: 176px;
+    height: auto;
+  }
+  .ag-hd__logo:hover {
+    opacity: 0.8;
+  }
+
+  /* Desktop nav: a sliding ink pill follows hover and the section in view */
+  .ag-nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .ag-nav__list {
+    --ink-x: 0px;
+    --ink-w: 0px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--ag-line);
+  }
+  .ag-nav__link {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--ag-muted);
+    text-decoration: none;
+    transition: color var(--ag-fast);
+  }
+  .ag-nav__link:hover,
+  .ag-nav__link.is-current {
+    color: #fff;
+  }
+  .ag-nav__ink {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0;
+    width: var(--ink-w);
+    translate: var(--ink-x) 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    opacity: 0;
+    transition:
+      translate var(--ag-med) var(--ag-ease),
+      width var(--ag-med) var(--ag-ease),
+      opacity var(--ag-fast);
+  }
+  .ag-nav__list.has-ink .ag-nav__ink {
+    opacity: 1;
+  }
+
+  .ag-hd__tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .ag-lang {
+    display: flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ag-lang a {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ag-muted);
+    text-decoration: none;
+  }
+  .ag-lang a[aria-current] {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  .ag-burger {
+    display: none;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    cursor: pointer;
+  }
+  .ag-burger span {
+    position: absolute;
+    left: 13px;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+    transition:
+      translate var(--ag-med) var(--ag-ease),
+      rotate var(--ag-med) var(--ag-ease),
+      opacity var(--ag-fast),
+      width var(--ag-med) var(--ag-ease);
+  }
+  .ag-burger span:nth-child(1) {
+    top: 15px;
+  }
+  .ag-burger span:nth-child(2) {
+    top: 21px;
+  }
+  .ag-burger span:nth-child(3) {
+    top: 27px;
+    width: 12px;
+  }
+  .ag-hd.is-open .ag-burger span:nth-child(1) {
+    translate: 0 6px;
+    rotate: 45deg;
+  }
+  .ag-hd.is-open .ag-burger span:nth-child(2) {
+    opacity: 0;
+  }
+  .ag-hd.is-open .ag-burger span:nth-child(3) {
+    width: 18px;
+    translate: 0 -6px;
+    rotate: -45deg;
+  }
+
+  .ag-drawer {
+    position: fixed;
+    inset: var(--ag-header-h) 0 0 0;
+    background: var(--ag-bg);
+    overflow-y: auto;
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition:
+      clip-path var(--ag-med) var(--ag-ease-io),
+      visibility 0s linear var(--ag-med);
+  }
+  .ag-hd.is-open .ag-drawer {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  .ag-drawer__inner {
+    display: grid;
+    gap: 28px;
+    padding-block: 16px 48px;
+  }
+  .ag-drawer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ag-drawer li {
+    opacity: 0;
+    translate: 0 12px;
+    transition:
+      opacity var(--ag-med) var(--ag-ease),
+      translate var(--ag-med) var(--ag-ease);
+  }
+  .ag-hd.is-open .ag-drawer li {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(var(--i) * 45ms + 120ms);
+  }
+  .ag-drawer li a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--ag-line);
+    font-family: var(--ag-head);
+    font-size: 1.75rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .ag-drawer__no {
+    font-family: var(--ag-font);
+    font-size: 0.8125rem;
+    color: var(--ag-dim);
+  }
+
+  @media (max-width: 1160px) {
+    .ag-hd__bar {
+      gap: 16px;
+    }
+    .ag-nav__link {
+      padding-inline: 10px;
+    }
+  }
+  @media (max-width: 1000px) {
+    .ag-nav,
+    .ag-hd__cta {
+      display: none;
+    }
+    .ag-burger {
+      display: block;
+    }
+  }
+  @media (max-width: 420px) {
+    .ag-hd__logo img {
+      width: 150px;
+    }
+  }
+</style>

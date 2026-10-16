@@ -1,0 +1,34 @@
+{
+  "de": {
+    "skip": "Zum Inhalt springen",
+    "h_home_aria": "Amaze Genius Startseite",
+    "h_nav_label": "Hauptnavigation",
+    "h_nav": [
+      ["Rundgang", "/#rundgang"],
+      ["White Label", "/#white-label"],
+      ["Mobil", "/#mobil"],
+      ["Integration", "/#integration"],
+      ["Ablauf", "/#ablauf"],
+      ["FAQ", "/#faq"]
+    ],
+    "h_cta": "Demo anfragen",
+    "h_cta_href": "/#kontakt",
+    "h_burger": "Menü öffnen",
+    "h_lang_label": "Sprache wählen",
+    "f_claim": "Der Web2Print-Editor für Fotobücher, Kalender und Fotogeschenke. In deinem Branding, in deinem Shop, angebunden an deine Produktion.",
+    "f_col_product": "Editor",
+    "f_col_company": "Jenomics",
+    "f_by": "Ein Produkt der",
+    "f_jenomics": "Jenomics GmbH",
+    "f_jenomics_href": "https://www.jenomics.de/",
+    "f_jenomics_desc": "IT-Dienstleister aus München, seit {founded}.",
+    "f_links_company": [
+      ["Über Jenomics", "https://www.jenomics.de/ueber-uns/"],
+      ["Kontakt", "/#kontakt"],
+      ["Impressum", "https://www.jenomics.de/impressum/"],
+      ["Datenschutz", "https://www.jenomics.de/datenschutz/"]
+    ],
+    "f_copy": "© {year} Jenomics GmbH. Alle Rechte vorbehalten.",
+    "f_top": "Nach oben"
+  }
+}

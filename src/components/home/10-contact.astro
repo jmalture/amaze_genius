@@ -1,0 +1,345 @@
+---
+/**
+ * Section "kontakt": demo request form → POST /api/contact/ (src/pages/api/contact.ts), behind a calmer second
+ * ribbon (blue → magenta). Works without JS (normal POST shows the JSON reply); with JS it submits inline.
+ * Texts: home.json "contact_*" and "form_*".
+ */
+import Icon from '../ui/Icon.astro';
+import { pick, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+import form from '../../i18n/form.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const ok = (form.form_ok as Record<string, string>)[lang] ?? form.form_ok.de;
+---
+
+<section class="ag-section ag-contact" id="kontakt">
+  <canvas class="ag-contact__gl" aria-hidden="true" data-ribbons="contact"></canvas>
+  <div class="ag-wrap ag-contact__grid">
+    <div class="ag-contact__copy">
+      <p class="ag-kicker" data-reveal>
+        {t.contact_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.contact_title_a}
+        <br />
+        <span class="ag-grad-s">{t.contact_title_b}</span>
+      </h2>
+      <p class="ag-lead" data-reveal style="--i:2">
+        {t.contact_lead}
+      </p>
+      <ul class="ag-contact__points">
+        {(t.contact_points as string[]).map((p, i) => (
+          <li data-reveal style={`--i:${i + 3}`}>
+            <Icon name="check" size={18} />
+            {p}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <form
+      class="ag-form ag-card"
+      method="post"
+      action="/api/contact/"
+      data-contact
+      data-ok={ok}
+      data-error={t.form_error}
+      data-reveal="scale"
+      style="--i:2"
+    >
+      <input type="hidden" name="lang" value={lang} />
+      <div class="ag-form__row">
+        <label class="ag-field">
+          <span>{t.form_name}</span>
+          <input type="text" name="form_fields[name]" autocomplete="name" maxlength="120" />
+        </label>
+        <label class="ag-field">
+          <span>{t.form_company}</span>
+          <input type="text" name="form_fields[company]" autocomplete="organization" maxlength="160" />
+        </label>
+      </div>
+      <div class="ag-form__row">
+        <label class="ag-field">
+          <span>{t.form_email} *</span>
+          <input type="email" name="form_fields[email]" autocomplete="email" required maxlength="200" />
+        </label>
+        <label class="ag-field">
+          <span>{t.form_phone}</span>
+          <input type="tel" name="form_fields[phone]" autocomplete="tel" pattern="[0-9()#&+*\-=. ]+" maxlength="50" />
+        </label>
+      </div>
+      <label class="ag-field">
+        <span>{t.form_message}</span>
+        <textarea name="form_fields[message]" rows="4" maxlength="5000"></textarea>
+      </label>
+      <label class="ag-check">
+        <input type="checkbox" name="form_fields[consent]" required />
+        <span>
+          {t.form_consent}{' '}
+          <a href={t.form_privacy_href} target="_blank" rel="noopener">
+            {t.form_privacy}
+          </a>
+          . *
+        </span>
+      </label>
+      <input
+        class="ag-hp"
+        type="text"
+        name="form_fields[website_hp]"
+        tabindex="-1"
+        autocomplete="off"
+        aria-hidden="true"
+      />
+      <button class="ag-btn ag-form__submit" type="submit" data-label={t.form_submit} data-sending={t.form_sending}>
+        <span>{t.form_submit}</span>
+        <Icon name="arrow" size={18} />
+      </button>
+      <p class="ag-form__status" role="status" aria-live="polite" data-status></p>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { createRibbons } from '../../scripts/ribbons';
+
+  // Second, calmer ribbon behind the form. Created only when the section comes near the viewport.
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-ribbons="contact"]');
+  if (canvas) {
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        const ok = createRibbons(canvas, {
+          still: matchMedia('(prefers-reduced-motion: reduce)').matches,
+          sparkles: 5,
+          alpha: 0.3,
+          lines: 80,
+          span: 1.25,
+          ribbons: [
+            {
+              y: -0.5,
+              slope: 0.4,
+              amp: 0.22,
+              freq: 3,
+              phase: 1,
+              twist: 2,
+              width: 0.55,
+              speed: 0.15,
+              hue: 0.6,
+              hueSpan: 0.3,
+              z: -0.2,
+            },
+            {
+              y: 0.5,
+              slope: -0.25,
+              amp: 0.18,
+              freq: 2.4,
+              phase: 3.5,
+              twist: 1.6,
+              width: 0.4,
+              speed: 0.12,
+              hue: 0.78,
+              hueSpan: 0.25,
+              z: 0.1,
+              gain: 0.7,
+            },
+          ],
+        });
+        canvas.classList.toggle('is-on', !!ok);
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(canvas);
+  }
+
+  // Inline submit with status message; keeps the normal POST as fallback.
+  document.querySelectorAll<HTMLFormElement>('form[data-contact]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const label = btn.querySelector('span')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      btn.disabled = true;
+      label.textContent = btn.dataset.sending!;
+      status.className = 'ag-form__status';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok && body.ok) {
+          status.textContent = body.message || form.dataset.ok!;
+          status.classList.add('is-ok');
+          form.reset();
+        } else {
+          status.textContent = body.message || form.dataset.error!;
+          status.classList.add('is-error');
+        }
+      } catch {
+        status.textContent = form.dataset.error!;
+        status.classList.add('is-error');
+      } finally {
+        btn.disabled = false;
+        label.textContent = btn.dataset.label!;
+      }
+    });
+  });
+</script>
+
+<style is:global>
+  .ag-contact {
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .ag-contact__gl {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.4s var(--ag-ease);
+  }
+  .ag-contact__gl.is-on {
+    opacity: 1;
+  }
+  .ag-contact::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, var(--ag-bg) 0%, transparent 20%, transparent 80%, var(--ag-bg) 100%);
+    pointer-events: none;
+  }
+  .ag-contact__grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+  .ag-contact__copy .ag-lead {
+    margin-top: 18px;
+  }
+  .ag-contact__points {
+    display: grid;
+    gap: 10px;
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-contact__points li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+  }
+  .ag-contact__points svg {
+    color: var(--ag-magenta-l);
+  }
+
+  .ag-form {
+    display: grid;
+    gap: 16px;
+    padding: clamp(22px, 3vw, 36px);
+    background: linear-gradient(180deg, rgba(21, 21, 28, 0.86), rgba(15, 15, 20, 0.86));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: var(--ag-r-xl);
+    box-shadow: var(--ag-shadow);
+  }
+  .ag-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .ag-field {
+    display: grid;
+    gap: 6px;
+  }
+  .ag-field span {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--ag-muted);
+  }
+  .ag-field input,
+  .ag-field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ag-line-2);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 1rem;
+    transition:
+      border-color var(--ag-fast),
+      background-color var(--ag-fast),
+      box-shadow var(--ag-fast);
+  }
+  .ag-field textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+  .ag-field input:focus,
+  .ag-field textarea:focus {
+    outline: none;
+    border-color: var(--ag-orchid-l);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 4px rgba(112, 41, 188, 0.25);
+  }
+  .ag-check {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+    font-size: 0.8125rem;
+    color: var(--ag-muted);
+    cursor: pointer;
+  }
+  .ag-check input {
+    width: 20px;
+    height: 20px;
+    margin: 1px 0 0;
+    accent-color: var(--ag-orchid);
+  }
+  .ag-check a {
+    color: var(--ag-text);
+  }
+  .ag-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .ag-form__submit {
+    justify-self: start;
+  }
+  .ag-form__submit:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+  .ag-form__status {
+    min-height: 1.4em;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .ag-form__status.is-ok {
+    color: #5ff0a8;
+  }
+  .ag-form__status.is-error {
+    color: #ff7a8a;
+  }
+
+  @media (max-width: 960px) {
+    .ag-contact__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .ag-form__row {
+      grid-template-columns: 1fr;
+    }
+    .ag-form__submit {
+      justify-self: stretch;
+    }
+  }
+</style>

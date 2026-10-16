@@ -1,0 +1,134 @@
+---
+/**
+ * Section "faq": accordion on native <details> (works without JS), smooth height via grid rows,
+ * plus FAQPage structured data. Texts: home.json "faq".
+ */
+import Icon from '../ui/Icon.astro';
+import { pick, fill, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const faq = (t.faq as { q: string; a: string }[]).map((f) => ({ q: fill(f.q), a: fill(f.a) }));
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<section class="ag-section ag-faq" id="faq">
+  <div class="ag-wrap ag-faq__grid">
+    <div class="ag-faq__head">
+      <p class="ag-kicker" data-reveal>
+        {t.faq_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.faq_title}
+      </h2>
+    </div>
+    <div class="ag-faq__list">
+      {faq.map((f, i) => (
+        <details class="ag-faq__item" data-reveal style={`--i:${Math.min(i, 4)}`} name="ag-faq">
+          <summary>
+            <span>{f.q}</span>
+            <i>
+              <Icon name="plus" size={18} />
+            </i>
+          </summary>
+          <div class="ag-faq__a">
+            <p>{f.a}</p>
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+</section>
+
+<style is:global>
+  .ag-faq__grid {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .ag-faq__head {
+    position: sticky;
+    top: calc(var(--ag-header-h) + 32px);
+  }
+  .ag-faq__list {
+    border-top: 1px solid var(--ag-line);
+  }
+  .ag-faq__item {
+    border-bottom: 1px solid var(--ag-line);
+  }
+  .ag-faq__item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 0;
+    font-family: var(--ag-head);
+    font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.3125rem);
+    font-weight: 500;
+    list-style: none;
+    cursor: pointer;
+    transition: color var(--ag-fast);
+  }
+  .ag-faq__item summary::-webkit-details-marker {
+    display: none;
+  }
+  .ag-faq__item summary:hover {
+    color: var(--ag-orchid-l);
+  }
+  .ag-faq__item summary i {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 50%;
+    border: 1px solid var(--ag-line-2);
+    transition:
+      rotate var(--ag-med) var(--ag-ease),
+      background var(--ag-med),
+      border-color var(--ag-med);
+  }
+  .ag-faq__item[open] summary i {
+    rotate: 45deg;
+    background: var(--ag-cool);
+    border-color: transparent;
+  }
+  /* smooth open/close where ::details-content is supported, instant elsewhere */
+  .ag-faq__item::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--ag-med) var(--ag-ease),
+      content-visibility var(--ag-med) allow-discrete;
+  }
+  .ag-faq__item[open]::details-content {
+    block-size: auto;
+  }
+  @supports (interpolate-size: allow-keywords) {
+    .ag-faq {
+      interpolate-size: allow-keywords;
+    }
+  }
+  .ag-faq__a p {
+    max-width: 64ch;
+    padding: 0 56px 24px 0;
+    color: var(--ag-muted);
+  }
+  @media (max-width: 860px) {
+    .ag-faq__grid {
+      grid-template-columns: 1fr;
+    }
+    .ag-faq__head {
+      position: static;
+    }
+    .ag-faq__a p {
+      padding-right: 0;
+    }
+  }
+</style>

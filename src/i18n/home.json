@@ -1,0 +1,219 @@
+{
+  "de": {
+    "hero_badge": "Web2Print-Editor · White Label",
+    "hero_title_a": "Gestalten, das",
+    "hero_title_b": "begeistert.",
+    "hero_lead": "Amaze Genius ist der Online-Editor für Fotobücher, Kalender, Tassen, Puzzles und Drucke. In deinem Branding, in deinem Shop und angebunden an deine Produktion.",
+    "hero_cta": "Demo anfragen",
+    "hero_cta2": "Editor entdecken",
+    "hero_facts": ["Responsive bis aufs Smartphone", "Theming in deinen Farben", "Produktionsanbindung inklusive"],
+    "hero_scroll": "Weiter zum Sortiment",
+
+    "range_kicker": "Sortiment",
+    "range_title_a": "Ein Editor für",
+    "range_title_b": "dein ganzes Sortiment.",
+    "range_lead": "Vom Fotobuch bis zur Tasse: Amaze Genius bringt deine Fotoprodukte in eine Oberfläche. Deine Kund:innen lernen den Editor einmal und gestalten damit alles.",
+    "range_items": [
+      { "key": "book", "name": "Fotobücher", "desc": "Seite für Seite oder Doppelseite für Doppelseite." },
+      { "key": "calendar", "name": "Kalender", "desc": "Zwölf Monate, zwölf Lieblingsfotos." },
+      { "key": "mug", "name": "Tassen", "desc": "Das Lieblingsfoto für jeden Morgen." },
+      { "key": "puzzle", "name": "Puzzles", "desc": "Erinnerungen zum Zusammensetzen." },
+      { "key": "print", "name": "Drucke", "desc": "Vom Abzug bis zum Wandbild." }
+    ],
+    "range_more": "… und vieles mehr",
+    "range_marquee": ["Fotobücher", "Kalender", "Tassen", "Puzzles", "Drucke", "Fotogeschenke"],
+
+    "tour_kicker": "Rundgang",
+    "tour_title_a": "So einfach gestalten",
+    "tour_title_b": "deine Kund:innen.",
+    "tour_lead": "Modern, intuitiv und schnell verstanden. Fünf Schritte vom ersten Foto bis zum Warenkorb.",
+    "tour_steps": [
+      {
+        "key": "upload",
+        "rail": "Fotos",
+        "title": "Fotos hochladen",
+        "text": "Fotos direkt vom Computer oder vom Handy hochladen. Sie landen in der Fotoleiste und sind sofort bereit für die Seiten."
+      },
+      {
+        "key": "layout",
+        "rail": "Layout",
+        "title": "Layout wählen",
+        "text": "Fertige Layouts für jede Seite und Doppelseite. Ein Klick, und die Aufteilung wechselt, die Fotos bleiben."
+      },
+      {
+        "key": "background",
+        "rail": "Hintergrund",
+        "title": "Hintergründe und Cliparts",
+        "text": "Einfarbig, Aquarell und mehr: Hintergründe und Cliparts geben jedem Projekt seinen eigenen Stil."
+      },
+      {
+        "key": "filter",
+        "rail": "Bearbeiten",
+        "title": "Fotos bearbeiten",
+        "text": "Effekte wie Schwarz/Weiß, Sepia oder Technicolor, dazu Transparenz, Spiegeln und Rahmen. Direkt am Foto, ohne Umweg."
+      },
+      {
+        "key": "order",
+        "rail": "Buch",
+        "title": "Prüfen und bestellen",
+        "text": "Seitenzahl anpassen, Vorschau ansehen, Projekt speichern. Preis immer im Blick, und mit einem Klick liegt das Produkt im Warenkorb deines Shops."
+      }
+    ],
+    "tour_mock_product": "Fotobuch A4 Hoch",
+    "tour_mock_variant": "Hardcover Glanz",
+    "tour_mock_price": "29,95 €",
+    "tour_mock_cart": "In den Warenkorb",
+    "tour_mock_pages": "26 Seiten",
+    "tour_mock_upload": "Fotos hochladen",
+    "tour_mock_note": "Illustration. Echte Screenshots folgen.",
+
+    "brand_kicker": "White Label",
+    "brand_title_a": "Dein Editor.",
+    "brand_title_b": "Deine Farben.",
+    "brand_lead": "Passe die Farben des Editors an dein Unternehmen an, damit sich das Gestalten anfühlt wie dein Shop. Probier es aus:",
+    "brand_presets_label": "Beispielmarke wählen",
+    "brand_presets": [
+      { "name": "Amaze Genius", "shop": "Amaze Genius", "color": "#0041F6", "color2": "#7029BC" },
+      { "name": "Fotowerk", "shop": "Fotowerk", "color": "#00A88F", "color2": "#0E6E8C" },
+      { "name": "Druckhaus Nord", "shop": "Druckhaus Nord", "color": "#F05A1A", "color2": "#C2185B" },
+      { "name": "Bildpunkt", "shop": "Bildpunkt", "color": "#FF00D8", "color2": "#7029BC" }
+    ],
+    "brand_mode_label": "Darstellung",
+    "brand_mode_light": "Light",
+    "brand_mode_dark": "Dark",
+    "brand_note": "Fiktive Beispielmarken.",
+    "brand_points": [
+      { "icon": "palette", "title": "Theming und Branding", "text": "Farben aus deinem Corporate Design, damit sich der Editor vertraut anfühlt." },
+      { "icon": "moon", "title": "Light Mode und Dark Mode", "text": "Je nach Vorliebe hell oder dunkel gestalten." },
+      { "icon": "sparkle", "title": "Personalisierung durch Jenomics", "text": "Wir übernehmen die komplette Anpassung, maßgeschneidert auf deine Bedürfnisse." }
+    ],
+
+    "mobile_kicker": "Mobil",
+    "mobile_title_a": "Am Handy",
+    "mobile_title_b": "genauso stark.",
+    "mobile_lead": "Der Editor ist responsive, egal ob deine Kund:innen am Computer sitzen oder das Handy in der Hand haben.",
+    "mobile_points": [
+      { "icon": "phone", "title": "Gestalten unterwegs", "text": "Kalender, Fotobücher und vieles mehr in wenig Zeit am Smartphone entwerfen und bestellen." },
+      { "icon": "save", "title": "Im Kundenkonto speichern", "text": "Projekte bleiben gespeichert, bis sie fertig sind." },
+      { "icon": "sync", "title": "Später weitermachen", "text": "An einem anderen Tag, auf einem anderen Gerät: einfach dort weitermachen, wo man aufgehört hat." }
+    ],
+    "mobile_mock_title": "Kalender 2027",
+    "mobile_mock_month": "März",
+    "mobile_sync": "Projekt gespeichert",
+
+    "int_kicker": "Integration",
+    "int_title_a": "Passt zu dem,",
+    "int_title_b": "was du schon hast.",
+    "int_lead": "Ob du einen Editor ablösen, deinen Webshop erweitern oder alles neu aufsetzen willst: Sag uns, was du brauchst, und wir finden die richtige Lösung.",
+    "int_blocks": ["Webshop", "Editor", "Checkout", "Produktion"],
+    "int_paths": [
+      {
+        "icon": "refresh",
+        "title": "Editor erneuern",
+        "short": "Du hast schon einen Editor?",
+        "text": "Du willst deinen bestehenden Editor modernisieren? Amaze Genius ersetzt ihn, dein Shop und deine Abläufe bleiben.",
+        "lit": [1]
+      },
+      {
+        "icon": "shop",
+        "title": "Webshop erweitern",
+        "short": "Du hast einen Shop, aber keinen Editor?",
+        "text": "Wir ergänzen deinen Webshop um Amaze Genius, inklusive Anbindung an deine Produktion.",
+        "lit": [1, 3]
+      },
+      {
+        "icon": "rocket",
+        "title": "Komplettlösung",
+        "short": "Du fängst bei null an?",
+        "text": "Webshop, Editor, Checkout und Produktionsanbindung aus einer Hand.",
+        "lit": [0, 1, 2, 3]
+      }
+    ],
+    "int_ours": "Von uns",
+
+    "flow_kicker": "Ablauf",
+    "flow_title_a": "Vom ersten Gespräch",
+    "flow_title_b": "bis zum ersten Auftrag.",
+    "flow_lead": "Jenomics übernimmt die komplette Personalisierung und Produktionsanbindung. Maßgeschneidert auf deine Bedürfnisse.",
+    "flow_steps": [
+      { "title": "Kennenlernen", "text": "Du erzählst uns von deinen Produkten, deinem Shop und deiner Produktion." },
+      { "title": "Personalisieren", "text": "Wir passen Amaze Genius an deine Marke und dein Sortiment an." },
+      { "title": "Anbinden", "text": "Wir verbinden den Editor mit deiner Produktion, damit jeder Auftrag sauber ankommt." },
+      { "title": "Live gehen", "text": "Deine Kund:innen gestalten, du produzierst." }
+    ],
+
+    "who_kicker": "Für wen",
+    "who_title_a": "B2B oder B2C.",
+    "who_title_b": "Hersteller oder Händler.",
+    "who_lead": "Amaze Genius ist der passende Editor für dein Business, egal auf welcher Seite der Produktion du stehst.",
+    "who_items": [
+      { "icon": "factory", "title": "Hersteller", "text": "Fotolabore und Druckereien, die ihren Kund:innen einen eigenen Editor bieten wollen." },
+      { "icon": "shop", "title": "Händler", "text": "Shops, die Fotoprodukte verkaufen und das Gestalten selbst anbieten wollen." },
+      { "icon": "users", "title": "B2C", "text": "Für Endkund:innen, die Geschenke und Erinnerungen gestalten." },
+      { "icon": "building", "title": "B2B", "text": "Für Geschäftskund:innen und ihre Kalender, Drucke und Präsente." }
+    ],
+    "jx_kicker": "Gebaut von Jenomics",
+    "jx_title": "Hinter Amaze Genius steht ein Team mit {years} Jahren IT-Erfahrung.",
+    "jx_text": "Die Jenomics GmbH aus München plant und baut seit {founded} Software, Hosting und E-Commerce-Lösungen. Amaze Genius ist der Nachfolger unseres E-Commerce-Produkts IKONA.",
+    "jx_stats": [
+      { "value": "{years}", "label": "Jahre Jenomics" },
+      { "value": "München", "label": "Firmensitz" },
+      { "value": "IKONA", "label": "Vorgänger von Amaze Genius" }
+    ],
+    "jx_link": "Mehr über Jenomics",
+
+    "faq_kicker": "FAQ",
+    "faq_title": "Häufige Fragen",
+    "faq": [
+      {
+        "q": "Was ist Amaze Genius?",
+        "a": "Amaze Genius ist ein Web2Print-Editor: ein Online-Gestalter, mit dem deine Kund:innen Fotobücher, Kalender, Tassen, Puzzles, Drucke und weitere Fotoprodukte direkt in deinem Shop gestalten und bestellen."
+      },
+      {
+        "q": "Für welche Produkte eignet sich der Editor?",
+        "a": "Für Fotobücher, Fotokalender, Tassen, Puzzles, Drucke und viele weitere Artikel. Welche Produkte in deinem Editor auftauchen, richten wir nach deinem Sortiment ein."
+      },
+      {
+        "q": "Kann ich den Editor an mein Branding anpassen?",
+        "a": "Ja. Die Farben des Editors werden an dein Unternehmen angepasst, damit sich das Gestalten wie dein Shop anfühlt. Light Mode und Dark Mode sind beide möglich."
+      },
+      {
+        "q": "Funktioniert Amaze Genius auf dem Smartphone?",
+        "a": "Ja, der Editor ist responsive. Deine Kund:innen können am Computer oder am Handy gestalten, Projekte im Kundenkonto speichern und später auf einem anderen Gerät weitermachen."
+      },
+      {
+        "q": "Ich habe schon einen Editor oder einen Webshop. Passt das?",
+        "a": "Ja. Wir können deinen bestehenden Editor ersetzen, deinen Webshop um Amaze Genius erweitern oder eine Komplettlösung mit Webshop, Editor, Checkout und Produktionsanbindung aufsetzen."
+      },
+      {
+        "q": "Wer kümmert sich um die Anbindung an meine Produktion?",
+        "a": "Jenomics übernimmt die komplette Personalisierung und die Produktionsanbindung, zugeschnitten auf deine Abläufe."
+      },
+      {
+        "q": "Ist Amaze Genius für B2B oder B2C?",
+        "a": "Für beides. Ob Hersteller oder Händler, ob du an Endkund:innen oder an Geschäftskund:innen verkaufst: Amaze Genius passt sich deinem Business an."
+      },
+      {
+        "q": "Wer steckt hinter Amaze Genius?",
+        "a": "Die Jenomics GmbH aus München, ein IT-Dienstleister mit über {years} Jahren Erfahrung in Softwareentwicklung, Hosting und E-Commerce."
+      }
+    ],
+
+    "contact_kicker": "Kontakt",
+    "contact_title_a": "Lass uns deinen",
+    "contact_title_b": "Editor bauen.",
+    "contact_lead": "Erzähl uns von deinen Produkten und deinem Shop. Wir melden uns mit einer Demo und einem Vorschlag, wie Amaze Genius zu dir passt.",
+    "contact_points": ["Persönliche Demo", "Lösung passend zu deinem Setup", "Antwort in Kürze"],
+    "form_name": "Name",
+    "form_company": "Firma",
+    "form_email": "E-Mail",
+    "form_phone": "Telefon (optional)",
+    "form_message": "Was möchtest du gestalten lassen?",
+    "form_consent": "Ich bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage gespeichert werden. Mehr dazu in der",
+    "form_privacy": "Datenschutzerklärung",
+    "form_privacy_href": "https://www.jenomics.de/datenschutz/",
+    "form_submit": "Demo anfragen",
+    "form_sending": "Wird gesendet …",
+    "form_error": "Leider ist ein Fehler aufgetreten. Bitte versuche es erneut."
+  }
+}

@@ -1,0 +1,340 @@
+---
+/**
+ * Section "sortiment": the product types the editor covers, as illustrated cards, plus a large marquee.
+ * Texts: src/i18n/home.json, keys "range_*". The illustrations are inline SVG in the brand gradients;
+ * swap them for product renders once the graphics are available.
+ */
+import { pick, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const items = t.range_items as { key: string; name: string; desc: string }[];
+const marquee = t.range_marquee as string[];
+---
+
+<section class="ag-section ag-range" id="sortiment">
+  <div class="ag-wrap">
+    <div class="ag-head ag-head--center">
+      <p class="ag-kicker" data-reveal>
+        {t.range_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.range_title_a} <span class="ag-grad">{t.range_title_b}</span>
+      </h2>
+      <p class="ag-lead" data-reveal style="--i:2">
+        {t.range_lead}
+      </p>
+    </div>
+
+    <ul class="ag-range__grid" data-spotlight>
+      {items.map((it, i) => (
+        <li class="ag-card ag-range__card" data-reveal style={`--i:${i}`} data-k={it.key}>
+          <div class="ag-range__art" aria-hidden="true">
+            {it.key === 'book' && (
+              <svg viewBox="0 0 160 120">
+                <defs>
+                  <linearGradient id="rg-b1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#0041F6" />
+                    <stop offset="1" stop-color="#7029BC" />
+                  </linearGradient>
+                  <linearGradient id="rg-b2" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#7029BC" />
+                    <stop offset="1" stop-color="#FF00D8" />
+                  </linearGradient>
+                </defs>
+                <g class="ag-range__float">
+                  <path d="M80 30 L22 22 Q18 21.5 18 26 L18 92 Q18 96 22 96.5 L80 104 Z" fill="url(#rg-b1)" />
+                  <path d="M80 30 L138 22 Q142 21.5 142 26 L142 92 Q142 96 138 96.5 L80 104 Z" fill="url(#rg-b2)" />
+                  <path d="M28 34 L72 39 L72 66 L28 61 Z" fill="#fff" opacity=".9" />
+                  <path d="M28 61 L40 50 L52 58 L60 51 L72 62 L72 66 Z" fill="#0041F6" opacity=".7" />
+                  <circle cx="62" cy="45" r="4" fill="#FFE000" />
+                  <path d="M88 39 L132 34 L132 88 L88 93 Z" fill="#fff" opacity=".18" />
+                  <path d="M80 30 L80 104" stroke="#fff" stroke-opacity=".35" />
+                </g>
+              </svg>
+            )}
+            {it.key === 'calendar' && (
+              <svg viewBox="0 0 160 120">
+                <defs>
+                  <linearGradient id="rg-c1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#F3940C" />
+                    <stop offset="1" stop-color="#FF00D8" />
+                  </linearGradient>
+                </defs>
+                <g class="ag-range__float">
+                  <rect x="34" y="18" width="92" height="88" rx="6" fill="#fff" />
+                  <rect x="34" y="18" width="92" height="48" rx="6" fill="url(#rg-c1)" />
+                  <path d="M34 66 L56 44 L74 58 L92 40 L126 66 Z" fill="#fff" opacity=".25" />
+                  {[0, 1, 2, 3, 4, 5, 6].map((c) =>
+                    [0, 1, 2].map((r) => (
+                      <rect
+                        x={42 + c * 11}
+                        y={74 + r * 9}
+                        width="7"
+                        height="5"
+                        rx="1"
+                        fill={c === 4 && r === 1 ? '#FF00D8' : '#C9C9D6'}
+                      />
+                    )),
+                  )}
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((n) => (
+                    <rect x={44 + n * 10} y="13" width="3" height="10" rx="1.5" fill="#d0d0dc" />
+                  ))}
+                </g>
+              </svg>
+            )}
+            {it.key === 'mug' && (
+              <svg viewBox="0 0 160 120">
+                <defs>
+                  <linearGradient id="rg-m1" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#8CFF06" />
+                    <stop offset=".5" stop-color="#00C3D9" />
+                    <stop offset="1" stop-color="#0041F6" />
+                  </linearGradient>
+                </defs>
+                <g class="ag-range__float">
+                  <path d="M104 46 h8 a16 16 0 0 1 0 32 h-8" fill="none" stroke="#e8e8f0" stroke-width="7" />
+                  <path d="M44 28 h62 v58 a14 14 0 0 1 -14 14 h-34 a14 14 0 0 1 -14 -14 Z" fill="#f4f4f8" />
+                  <rect x="52" y="40" width="46" height="36" rx="5" fill="url(#rg-m1)" />
+                  <circle cx="66" cy="54" r="5" fill="#fff" opacity=".85" />
+                  <ellipse cx="75" cy="28" rx="31" ry="4" fill="#dcdce6" />
+                  <path
+                    class="ag-range__steam"
+                    d="M66 20 q-5 -6 0 -12 M78 20 q-5 -6 0 -12 M90 20 q-5 -6 0 -12"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-opacity=".35"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </g>
+              </svg>
+            )}
+            {it.key === 'puzzle' && (
+              <svg viewBox="0 0 160 120">
+                <defs>
+                  <linearGradient id="rg-p1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#FFE000" />
+                    <stop offset="1" stop-color="#F81200" />
+                  </linearGradient>
+                  <linearGradient id="rg-p2" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#00C3D9" />
+                    <stop offset="1" stop-color="#0041F6" />
+                  </linearGradient>
+                </defs>
+                <g class="ag-range__float">
+                  <path d="M36 30 h30 a8 8 0 1 1 14 0 h0 v26 a8 8 0 1 0 0 14 v0 h-44 Z" fill="url(#rg-p1)" />
+                  <path d="M36 70 h44 v30 h-44 Z" fill="url(#rg-p2)" opacity=".9" />
+                  <g class="ag-range__piece">
+                    <path d="M86 30 h38 v40 h-38 v-14 a8 8 0 1 1 0 -14 Z" fill="#7029BC" />
+                    <path d="M86 30 h38 v40 h-38 v-14 a8 8 0 1 1 0 -14 Z" fill="url(#rg-p2)" opacity=".35" />
+                  </g>
+                </g>
+              </svg>
+            )}
+            {it.key === 'print' && (
+              <svg viewBox="0 0 160 120">
+                <defs>
+                  <linearGradient id="rg-f1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#0041F6" />
+                    <stop offset=".6" stop-color="#7029BC" />
+                    <stop offset="1" stop-color="#FF00D8" />
+                  </linearGradient>
+                </defs>
+                <g class="ag-range__float">
+                  <rect x="40" y="14" width="80" height="94" rx="3" fill="#f4f4f8" />
+                  <rect x="48" y="22" width="64" height="78" fill="url(#rg-f1)" />
+                  <path d="M48 100 L48 74 L66 58 L82 72 L96 60 L112 76 L112 100 Z" fill="#0d0d0d" opacity=".55" />
+                  <circle cx="94" cy="38" r="7" fill="#FFE000" />
+                </g>
+              </svg>
+            )}
+          </div>
+          <h3>{it.name}</h3>
+          <p>{it.desc}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="ag-range__more" data-reveal>
+      {t.range_more}
+    </p>
+  </div>
+
+  <div class="ag-marquee" aria-hidden="true">
+    <div class="ag-marquee__track">
+      {[0, 1].map(() => (
+        <span>
+          {marquee.map((m) => (
+            <>
+              <b>{m}</b>
+              <i />
+            </>
+          ))}
+        </span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .ag-range {
+    overflow: hidden;
+  }
+  .ag-range__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-range__card {
+    padding: 18px 18px 22px;
+    transition:
+      translate var(--ag-med) var(--ag-ease),
+      border-color var(--ag-med);
+  }
+  .ag-range__card:hover {
+    translate: 0 -6px;
+  }
+  .ag-range__art {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 18px;
+    border-radius: var(--ag-r);
+    background:
+      radial-gradient(70% 70% at 50% 60%, rgba(112, 41, 188, 0.28), transparent 70%), rgba(255, 255, 255, 0.025);
+    overflow: hidden;
+  }
+  .ag-range__art svg {
+    width: 100%;
+    height: 100%;
+  }
+  .ag-range__float {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition: transform var(--ag-med) var(--ag-spring);
+  }
+  .ag-range__card:hover .ag-range__float {
+    transform: scale(1.08) rotate(-3deg);
+  }
+  .ag-range__piece {
+    transform-box: fill-box;
+    transform-origin: 0% 50%;
+    transition: transform var(--ag-med) var(--ag-spring);
+  }
+  .ag-range__card:hover .ag-range__piece {
+    transform: translate(-6px, 4px) rotate(-8deg);
+  }
+  .ag-range__steam {
+    animation: ag-steam 3s ease-in-out infinite;
+  }
+  @keyframes ag-steam {
+    0%,
+    100% {
+      opacity: 0.2;
+      translate: 0 2px;
+    }
+    50% {
+      opacity: 1;
+      translate: 0 -3px;
+    }
+  }
+  .ag-range__card h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .ag-range__card p {
+    margin-top: 6px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ag-muted);
+  }
+  .ag-range__more {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--ag-dim);
+  }
+
+  /* Big marquee of product names, outlined, the current word lights up in the spectrum */
+  .ag-marquee {
+    margin-top: clamp(56px, 7vw, 96px);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .ag-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: ag-marquee 42s linear infinite;
+  }
+  .ag-marquee:hover .ag-marquee__track {
+    animation-play-state: paused;
+  }
+  .ag-marquee span {
+    display: flex;
+    align-items: center;
+  }
+  .ag-marquee b {
+    padding-inline: clamp(18px, 2.5vw, 36px);
+    font-family: var(--ag-head);
+    font-size: clamp(3rem, 2rem + 5vw, 7rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.22);
+    transition: color var(--ag-med);
+  }
+  .ag-marquee b:hover {
+    color: #fff;
+    -webkit-text-stroke-color: transparent;
+  }
+  .ag-marquee i {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border-radius: 50%;
+    background: conic-gradient(#f81200, #ffe000, #8cff06, #00c3d9, #0041f6, #ff00d8, #f81200);
+  }
+  @keyframes ag-marquee {
+    to {
+      translate: -50% 0;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .ag-range__grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .ag-range__card {
+      grid-column: span 2;
+    }
+    .ag-range__card:nth-child(4) {
+      grid-column: 2 / span 2;
+    }
+  }
+  @media (max-width: 700px) {
+    .ag-range__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .ag-range__card,
+    .ag-range__card:nth-child(4) {
+      grid-column: auto;
+      padding: 12px 12px 16px;
+    }
+    .ag-range__card:last-child {
+      grid-column: 1 / -1;
+    }
+    .ag-range__card:last-child .ag-range__art {
+      aspect-ratio: 16 / 7;
+    }
+    .ag-range__card h3 {
+      font-size: 1.0625rem;
+    }
+    .ag-range__card p {
+      font-size: 0.875rem;
+    }
+  }
+</style>

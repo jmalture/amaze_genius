@@ -1,0 +1,92 @@
+---
+import '../styles/fonts.css';
+import '../styles/site.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { LANGS, LIVE_LANGS, langInfo, fill, pick, type Lang } from '../i18n';
+import chrome from '../i18n/chrome.json';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Path of this page in every language that has it, e.g. { de: '/', en: '/en/' } */
+  alternates: Partial<Record<Lang, string>>;
+  ogImage?: string;
+}
+const { lang, title, description, alternates, ogImage = '/media/og-amaze-genius.jpg' } = Astro.props;
+const site = Astro.site!;
+const canonical = new URL(alternates[lang] ?? Astro.url.pathname, site).href;
+const info = langInfo(lang);
+const t = pick(chrome as Record<string, any>, lang);
+const live = LANGS.filter((l) => LIVE_LANGS.includes(l.code) && alternates[l.code]);
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Amaze Genius',
+  applicationCategory: 'DesignApplication',
+  operatingSystem: 'Web',
+  description: fill(description),
+  url: new URL('/', site).href,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Jenomics GmbH',
+    url: 'https://www.jenomics.de/',
+    foundingDate: '2001',
+    address: { '@type': 'PostalAddress', addressLocality: 'München', addressCountry: 'DE' },
+  },
+};
+---
+
+<!doctype html>
+<html lang={info.locale} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      document.documentElement.classList.replace('no-js', 'js');
+    </script>
+    <title>{fill(title)}</title>
+    <meta name="description" content={fill(description)} />
+    <link rel="canonical" href={canonical} />
+    {live.length > 1 &&
+      live.map((l) => <link rel="alternate" hreflang={l.code} href={new URL(alternates[l.code]!, site).href} />)}
+    <meta property="og:locale" content={info.og} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fill(title)} />
+    <meta property="og:description" content={fill(description)} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Amaze Genius" />
+    <meta property="og:image" content={new URL(ogImage, site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#09090c" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png" />
+    <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/favicon-192.png" />
+    <link rel="preload" href="/fonts/outfit-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="/fonts/wix-madefor-display-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link screen-reader-text" href="#content">
+      {t.skip}
+    </a>
+    <div class="ag-progress" aria-hidden="true"></div>
+    <Header lang={lang} alternates={alternates} />
+    <main id="content">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import '../scripts/site.ts';
+    </script>
+  </body>
+</html>

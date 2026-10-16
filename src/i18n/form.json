@@ -1,0 +1,14 @@
+{
+  "form_ok": {
+    "de": "Danke! Wir melden uns in Kürze bei dir.",
+    "en": "Thank you! We will get back to you shortly."
+  },
+  "form_error": {
+    "de": "Leider ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+    "en": "Sorry, something went wrong. Please try again."
+  },
+  "form_invalid": {
+    "de": "Bitte prüfe deine Eingabe.",
+    "en": "Please check your input."
+  }
+}

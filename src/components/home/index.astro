@@ -1,0 +1,26 @@
+---
+/** The homepage sections in page order. Reorder or remove sections here. */
+import type { Lang } from '../../i18n';
+import Hero from './01-hero.astro';
+import Range from './02-range.astro';
+import Tour from './03-tour.astro';
+import Brand from './04-brand.astro';
+import Mobile from './05-mobile.astro';
+import Integration from './06-integration.astro';
+import Flow from './07-flow.astro';
+import Who from './08-who.astro';
+import Faq from './09-faq.astro';
+import Contact from './10-contact.astro';
+const { lang } = Astro.props as { lang: Lang };
+---
+
+<Hero lang={lang} />
+<Range lang={lang} />
+<Tour lang={lang} />
+<Brand lang={lang} />
+<Mobile lang={lang} />
+<Integration lang={lang} />
+<Flow lang={lang} />
+<Who lang={lang} />
+<Faq lang={lang} />
+<Contact lang={lang} />

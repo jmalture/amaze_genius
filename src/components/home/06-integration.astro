@@ -1,0 +1,281 @@
+---
+/**
+ * Section "integration": three ways to start (replace an editor, extend a shop, complete solution).
+ * The building-block row lights up the parts Amaze Genius/Jenomics provide for the selected path.
+ * Desktop: hover/focus expands a panel; mobile: tabs. Texts: home.json "int_*".
+ */
+import Icon from '../ui/Icon.astro';
+import { pick, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const blocks = t.int_blocks as string[];
+const paths = t.int_paths as {
+  icon: 'refresh' | 'shop' | 'rocket';
+  title: string;
+  short: string;
+  text: string;
+  lit: number[];
+}[];
+const blockIcons = ['shop', 'sparkle', 'cart', 'factory'] as const;
+---
+
+<section class="ag-section ag-int" id="integration">
+  <div class="ag-wrap">
+    <div class="ag-head ag-head--center">
+      <p class="ag-kicker" data-reveal>
+        {t.int_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.int_title_a} <span class="ag-grad">{t.int_title_b}</span>
+      </h2>
+      <p class="ag-lead" data-reveal style="--i:2">
+        {t.int_lead}
+      </p>
+    </div>
+
+    <div class="ag-int__ui" data-int data-reveal style="--i:3">
+      <div class="ag-int__tabs" role="tablist" aria-label={t.int_kicker}>
+        {paths.map((p, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`ag-int-tab-${i}`}
+            aria-controls={`ag-int-panel-${i}`}
+            aria-selected={i === 1 ? 'true' : 'false'}
+            tabindex={i === 1 ? 0 : -1}
+            data-lit={p.lit.join(',')}
+          >
+            <span class="ag-int__ti">
+              <Icon name={p.icon} size={20} />
+            </span>
+            <span class="ag-int__tt">
+              <strong>{p.title}</strong>
+              <small>{p.short}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div class="ag-int__panels">
+        {paths.map((p, i) => (
+          <div
+            class="ag-int__panel"
+            role="tabpanel"
+            id={`ag-int-panel-${i}`}
+            aria-labelledby={`ag-int-tab-${i}`}
+            hidden={i !== 1}
+          >
+            <p>{p.text}</p>
+          </div>
+        ))}
+        <div class="ag-int__blocks" data-blocks aria-hidden="true">
+          {blocks.map((b, i) => (
+            <span class="ag-int__block" data-b={i} style={`--i:${i}`}>
+              <Icon name={blockIcons[i]} size={20} />
+              {b}
+              <small>{t.int_ours}</small>
+            </span>
+          ))}
+          <span class="ag-int__wire"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-int]');
+  if (root) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = tabs.map((tb) => document.getElementById(tb.getAttribute('aria-controls')!)!);
+    const blocks = [...root.querySelectorAll<HTMLElement>('[data-b]')];
+    const select = (i: number, focus = false) => {
+      tabs.forEach((tb, k) => {
+        const on = k === i;
+        tb.setAttribute('aria-selected', String(on));
+        tb.tabIndex = on ? 0 : -1;
+        panels[k].hidden = !on;
+      });
+      const lit = tabs[i].dataset.lit!.split(',').map(Number);
+      blocks.forEach((b, k) => b.classList.toggle('is-lit', lit.includes(k)));
+      root.style.setProperty('--tab', String(i));
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((tb, i) => {
+      tb.addEventListener('click', () => select(i));
+      tb.addEventListener('pointerenter', () => matchMedia('(hover: hover)').matches && select(i));
+    });
+    root.querySelector('[role="tablist"]')!.addEventListener('keydown', (e) => {
+      const k = (e as KeyboardEvent).key;
+      const cur = tabs.findIndex((tb) => tb.getAttribute('aria-selected') === 'true');
+      if (k === 'ArrowRight' || k === 'ArrowDown') select((cur + 1) % tabs.length, true);
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') select((cur - 1 + tabs.length) % tabs.length, true);
+      else return;
+      e.preventDefault();
+    });
+    select(1);
+  }
+</script>
+
+<style is:global>
+  .ag-int__ui {
+    max-width: 1040px;
+    margin-inline: auto;
+  }
+  .ag-int__tabs {
+    --tab: 1;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .ag-int__tabs button {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border-radius: var(--ag-r-lg);
+    border: 1px solid var(--ag-line);
+    background: rgba(255, 255, 255, 0.025);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color var(--ag-med),
+      background-color var(--ag-med),
+      translate var(--ag-med) var(--ag-ease);
+  }
+  .ag-int__tabs button:hover {
+    translate: 0 -3px;
+  }
+  .ag-int__tabs [aria-selected='true'] {
+    border-color: rgba(179, 138, 240, 0.55);
+    background:
+      radial-gradient(120% 100% at 0% 0%, rgba(112, 41, 188, 0.3), transparent 60%), rgba(255, 255, 255, 0.04);
+  }
+  .ag-int__ti {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--ag-muted);
+    transition:
+      background var(--ag-med),
+      color var(--ag-med);
+  }
+  .ag-int__tabs [aria-selected='true'] .ag-int__ti {
+    background: var(--ag-cool);
+    color: #fff;
+  }
+  .ag-int__tt strong {
+    display: block;
+    font-family: var(--ag-head);
+    font-size: 1.1875rem;
+    font-weight: 500;
+  }
+  .ag-int__tt small {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.875rem;
+    color: var(--ag-muted);
+  }
+
+  .ag-int__panels {
+    margin-top: 12px;
+    padding: clamp(24px, 4vw, 44px);
+    border-radius: var(--ag-r-xl);
+    border: 1px solid var(--ag-line);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  }
+  .ag-int__panel p {
+    max-width: 62ch;
+    margin-inline: auto;
+    text-align: center;
+    font-size: var(--ag-lead);
+    color: var(--ag-text);
+    animation: ag-fade-up 0.6s var(--ag-ease);
+  }
+  .ag-int__blocks {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(10px, 2vw, 28px);
+    margin-top: 32px;
+  }
+  .ag-int__wire {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 50%;
+    height: 2px;
+    z-index: 0;
+    background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 6px, transparent 6px 12px);
+  }
+  .ag-int__block {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 18px 10px 14px;
+    border-radius: var(--ag-r);
+    border: 1px solid var(--ag-line);
+    background: #111117;
+    color: var(--ag-dim);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition:
+      color var(--ag-med),
+      border-color var(--ag-med),
+      box-shadow var(--ag-med),
+      translate var(--ag-med) var(--ag-spring);
+    transition-delay: calc(var(--i) * 60ms);
+  }
+  .ag-int__block small {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ag-magenta-l);
+    opacity: 0;
+    transition: opacity var(--ag-med);
+    transition-delay: inherit;
+  }
+  .ag-int__block.is-lit {
+    color: #fff;
+    border-color: transparent;
+    translate: 0 -4px;
+    background:
+      linear-gradient(#141420, #141420) padding-box,
+      var(--ag-cool) border-box;
+    border: 1px solid transparent;
+    box-shadow: 0 16px 40px rgba(112, 41, 188, 0.35);
+  }
+  .ag-int__block.is-lit small {
+    opacity: 1;
+  }
+  .ag-int__block.is-lit svg {
+    color: var(--ag-magenta-l);
+  }
+
+  @media (max-width: 860px) {
+    .ag-int__tabs {
+      grid-template-columns: 1fr;
+    }
+    .ag-int__tt small {
+      display: none;
+    }
+    .ag-int__tabs button {
+      padding: 12px 14px;
+    }
+    .ag-int__blocks {
+      grid-template-columns: 1fr 1fr;
+    }
+    .ag-int__wire {
+      display: none;
+    }
+  }
+</style>

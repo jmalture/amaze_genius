@@ -1,0 +1,639 @@
+---
+/**
+ * Section "white-label": pick a (fictional) brand and light/dark mode, the mini editor re-themes itself live.
+ * Shows the real features "Theming und Branding" and "Light Mode / Dark Mode". Texts: home.json "brand_*".
+ */
+import Icon from '../ui/Icon.astro';
+import { pick, type Lang } from '../../i18n';
+import data from '../../i18n/home.json';
+const { lang } = Astro.props as { lang: Lang };
+const t = pick(data as Record<string, any>, lang);
+const presets = t.brand_presets as { name: string; shop: string; color: string; color2: string }[];
+const points = t.brand_points as { icon: 'palette' | 'moon' | 'sparkle'; title: string; text: string }[];
+const first = presets[0];
+---
+
+<section class="ag-section ag-brand" id="white-label">
+  <div class="ag-brand__glow" aria-hidden="true"></div>
+  <div class="ag-wrap ag-brand__grid">
+    <div class="ag-brand__copy">
+      <p class="ag-kicker" data-reveal>
+        {t.brand_kicker}
+      </p>
+      <h2 class="ag-h2" data-reveal style="--i:1">
+        {t.brand_title_a}
+        <br />
+        <span class="ag-brand__word">{t.brand_title_b}</span>
+      </h2>
+      <p class="ag-lead" data-reveal style="--i:2">
+        {t.brand_lead}
+      </p>
+
+      <div class="ag-brand__controls" data-reveal style="--i:3">
+        <div class="ag-brand__presets" role="radiogroup" aria-label={t.brand_presets_label} data-presets>
+          {presets.map((p, i) => (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={i === 0 ? 'true' : 'false'}
+              data-color={p.color}
+              data-color2={p.color2}
+              data-shop={p.shop}
+              style={`--c:${p.color};--c2:${p.color2}`}
+            >
+              <i />
+              {p.name}
+            </button>
+          ))}
+        </div>
+        <div class="ag-brand__mode" role="radiogroup" aria-label={t.brand_mode_label} data-modes>
+          <button type="button" role="radio" aria-checked="false" data-mode="light">
+            <Icon name="sun" size={16} />
+            {t.brand_mode_light}
+          </button>
+          <button type="button" role="radio" aria-checked="true" data-mode="dark">
+            <Icon name="moon" size={16} />
+            {t.brand_mode_dark}
+          </button>
+          <span class="ag-brand__thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+      <p class="ag-brand__note">{t.brand_note}</p>
+    </div>
+
+    <div class="ag-brand__stage" data-reveal="scale" style="--i:2">
+      <div
+        class="ag-mini"
+        data-mini
+        data-mode="dark"
+        style={`--b:${first.color};--b2:${first.color2}`}
+        aria-hidden="true"
+      >
+        <div class="ag-mini__top">
+          <span class="ag-mini__logo">
+            <i></i>
+            <b data-shop>{first.shop}</b>
+          </span>
+          <span class="ag-mini__title">Kalender A3 Quer</span>
+          <span class="ag-mini__cart">
+            <Icon name="cart" size={13} />
+            In den Warenkorb
+          </span>
+        </div>
+        <div class="ag-mini__body">
+          <div class="ag-mini__rail">
+            <span class="is-on">
+              <Icon name="photo" size={16} />
+            </span>
+            <span>
+              <Icon name="layout" size={16} />
+            </span>
+            <span>
+              <Icon name="background" size={16} />
+            </span>
+            <span>
+              <Icon name="clipart" size={16} />
+            </span>
+            <span>
+              <Icon name="text" size={16} />
+            </span>
+          </div>
+          <div class="ag-mini__panel">
+            <span class="ag-mini__btn">Fotos wählen</span>
+            <div class="ag-mini__thumbs">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <span class={`ag-mini__th t${i}`} />
+              ))}
+            </div>
+            <span class="ag-mini__chip">6 Fotos</span>
+          </div>
+          <div class="ag-mini__canvas">
+            <div class="ag-mini__cal">
+              <div class="ag-mini__photo">
+                <em class="ag-mini__sel"></em>
+              </div>
+              <div class="ag-mini__month">
+                <strong>März</strong>
+                <div class="ag-mini__days">
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <span class={i === 13 ? 'is-on' : ''}>{i + 1}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div class="ag-mini__zoom">
+              <span>–</span>64 %<span>+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ag-wrap">
+    <ul class="ag-brand__points" data-spotlight>
+      {points.map((p, i) => (
+        <li class="ag-card" data-reveal style={`--i:${i}`}>
+          <span class="ag-ico">
+            <Icon name={p.icon} size={22} />
+          </span>
+          <h3>{p.title}</h3>
+          <p>{p.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const mini = document.querySelector<HTMLElement>('[data-mini]');
+  const presets = document.querySelector<HTMLElement>('[data-presets]');
+  const modes = document.querySelector<HTMLElement>('[data-modes]');
+  if (mini && presets && modes) {
+    const shop = mini.querySelector<HTMLElement>('[data-shop]')!;
+    const radios = (group: HTMLElement) => [...group.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
+    const choose = (group: HTMLElement, btn: HTMLButtonElement, apply: (b: HTMLButtonElement) => void) => {
+      radios(group).forEach((b) => b.setAttribute('aria-checked', String(b === btn)));
+      apply(btn);
+    };
+    const applyBrand = (b: HTMLButtonElement) => {
+      mini.style.setProperty('--b', b.dataset.color!);
+      mini.style.setProperty('--b2', b.dataset.color2!);
+      mini.classList.remove('is-swap');
+      void mini.offsetWidth;
+      mini.classList.add('is-swap');
+      shop.textContent = b.dataset.shop!;
+    };
+    const applyMode = (b: HTMLButtonElement) => {
+      mini.dataset.mode = b.dataset.mode;
+      modes.dataset.mode = b.dataset.mode;
+    };
+    modes.dataset.mode = 'dark';
+    // Arrow keys move within each radio group.
+    const wire = (group: HTMLElement, apply: (b: HTMLButtonElement) => void) => {
+      const list = radios(group);
+      list.forEach((b, i) => {
+        b.tabIndex = b.getAttribute('aria-checked') === 'true' ? 0 : -1;
+        b.addEventListener('click', () => {
+          stopAuto();
+          choose(group, b, apply);
+          list.forEach((x) => (x.tabIndex = x === b ? 0 : -1));
+        });
+        b.addEventListener('keydown', (e) => {
+          const d =
+            e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+          if (!d) return;
+          e.preventDefault();
+          const n = list[(i + d + list.length) % list.length];
+          n.focus();
+          n.click();
+        });
+      });
+    };
+    wire(presets, applyBrand);
+    wire(modes, applyMode);
+
+    // Until the visitor picks one, the brands cycle on their own while the section is in view.
+    const list = radios(presets);
+    let idx = 0;
+    let timer = 0;
+    let auto = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stopAuto = () => {
+      auto = false;
+      clearInterval(timer);
+    };
+    new IntersectionObserver(
+      ([e]) => {
+        clearInterval(timer);
+        if (e.isIntersecting && auto)
+          timer = window.setInterval(() => {
+            idx = (idx + 1) % list.length;
+            choose(presets, list[idx], applyBrand);
+          }, 2600);
+      },
+      { threshold: 0.4 },
+    ).observe(mini);
+  }
+</script>
+
+<style is:global>
+  .ag-brand {
+    overflow: hidden;
+  }
+  .ag-brand__glow {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    width: 900px;
+    height: 600px;
+    translate: -10% 0;
+    background: radial-gradient(closest-side, rgba(112, 41, 188, 0.35), transparent);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .ag-brand__grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+  .ag-brand__word {
+    background: linear-gradient(100deg, #ff5a3d, #ffb03b 20%, #a6ff4d 40%, #34e1f5 58%, #6b93ff 74%, #ff6cec);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ag-brand__copy .ag-lead {
+    margin-top: 18px;
+  }
+  .ag-brand__controls {
+    display: grid;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .ag-brand__presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ag-brand__presets button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px 9px 10px;
+    border: 1px solid var(--ag-line-2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      border-color var(--ag-fast),
+      background-color var(--ag-fast),
+      translate var(--ag-fast) var(--ag-ease);
+  }
+  .ag-brand__presets button:hover {
+    translate: 0 -2px;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .ag-brand__presets i {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c), var(--c2));
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  }
+  .ag-brand__presets [aria-checked='true'] {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 18%, transparent);
+  }
+  .ag-brand__mode {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    width: max-content;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--ag-line);
+  }
+  .ag-brand__mode button {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ag-muted);
+    cursor: pointer;
+    transition: color var(--ag-med);
+  }
+  .ag-brand__mode button[aria-checked='true'] {
+    color: var(--ag-coal);
+  }
+  .ag-brand__thumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 999px;
+    background: #fff;
+    translate: 100% 0;
+    transition: translate var(--ag-med) var(--ag-spring);
+  }
+  .ag-brand__mode[data-mode='light'] .ag-brand__thumb {
+    translate: 0 0;
+  }
+  .ag-brand__note {
+    margin-top: 14px;
+    font-size: 0.75rem;
+    color: var(--ag-dim);
+  }
+
+  /* Mini editor that re-themes itself */
+  .ag-brand__stage {
+    perspective: 1400px;
+  }
+  .ag-mini {
+    --bg: #121218;
+    --panel: #17171f;
+    --canvas: #0d0d12;
+    --ink: #ececf2;
+    --mute: #8d8da0;
+    --line: rgba(255, 255, 255, 0.08);
+    --chip: rgba(255, 255, 255, 0.07);
+    display: grid;
+    grid-template-rows: 48px 1fr;
+    aspect-ratio: 1.42;
+    border-radius: 18px;
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 40px 90px rgba(0, 0, 0, 0.55),
+      0 0 0 1px color-mix(in srgb, var(--b) 25%, transparent),
+      0 30px 80px color-mix(in srgb, var(--b) 22%, transparent);
+    font-size: 12px;
+    overflow: hidden;
+    transform: rotateY(-8deg) rotateX(4deg);
+    transition:
+      background-color 0.6s var(--ag-ease),
+      color 0.6s var(--ag-ease),
+      box-shadow 0.6s var(--ag-ease),
+      transform 1s var(--ag-ease);
+  }
+  .ag-brand__stage:hover .ag-mini {
+    transform: rotateY(-3deg) rotateX(2deg);
+  }
+  .ag-mini[data-mode='light'] {
+    --bg: #ffffff;
+    --panel: #f6f6f9;
+    --canvas: #ececf1;
+    --ink: #17171f;
+    --mute: #6c6c80;
+    --line: rgba(0, 0, 0, 0.08);
+    --chip: rgba(0, 0, 0, 0.05);
+  }
+  .ag-mini * {
+    transition:
+      background-color 0.6s var(--ag-ease),
+      color 0.6s var(--ag-ease),
+      border-color 0.6s var(--ag-ease),
+      box-shadow 0.6s var(--ag-ease);
+  }
+  .ag-mini.is-swap .ag-mini__cart,
+  .ag-mini.is-swap .ag-mini__logo i {
+    animation: ag-pop 0.6s var(--ag-spring);
+  }
+  @keyframes ag-pop {
+    40% {
+      scale: 1.12;
+    }
+  }
+  .ag-mini__top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .ag-mini__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 12.5px;
+  }
+  .ag-mini__logo i {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--b), var(--b2));
+  }
+  .ag-mini__title {
+    font-weight: 600;
+  }
+  .ag-mini__cart {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--b);
+    color: #fff;
+    font-weight: 600;
+  }
+  .ag-mini__body {
+    display: grid;
+    grid-template-columns: 52px 30% 1fr;
+    min-height: 0;
+  }
+  .ag-mini__rail {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 10px 7px;
+    border-right: 1px solid var(--line);
+  }
+  .ag-mini__rail span {
+    display: grid;
+    place-items: center;
+    height: 36px;
+    border-radius: 10px;
+    color: var(--mute);
+  }
+  .ag-mini__rail .is-on {
+    background: color-mix(in srgb, var(--b) 18%, transparent);
+    color: var(--b);
+  }
+  .ag-mini[data-mode='dark'] .ag-mini__rail .is-on {
+    color: color-mix(in srgb, var(--b) 55%, #fff);
+  }
+  .ag-mini__panel {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+  }
+  .ag-mini__btn {
+    padding: 9px;
+    border-radius: 10px;
+    background: var(--b);
+    color: #fff;
+    text-align: center;
+    font-weight: 600;
+  }
+  .ag-mini__thumbs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .ag-mini__th {
+    aspect-ratio: 1.2;
+    border-radius: 6px;
+    background: linear-gradient(160deg, var(--a, #9ad1ff), var(--z, #3d6cff));
+  }
+  .ag-mini__th.t1 {
+    --a: #ffd08a;
+    --z: #ff6b6b;
+  }
+  .ag-mini__th.t2 {
+    --a: #c0f5b0;
+    --z: #2ea38f;
+  }
+  .ag-mini__th.t3 {
+    --a: #e7c4ff;
+    --z: #8e4dff;
+    box-shadow: 0 0 0 2px var(--b);
+  }
+  .ag-mini__th.t4 {
+    --a: #ffe08a;
+    --z: #ff9f1c;
+  }
+  .ag-mini__th.t5 {
+    --a: #a0f0ff;
+    --z: #1b9aaa;
+  }
+  .ag-mini__chip {
+    justify-self: start;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--mute);
+    font-size: 11px;
+  }
+  .ag-mini__canvas {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    gap: 10px;
+    padding: 18px;
+    background: var(--canvas);
+  }
+  .ag-mini__cal {
+    align-self: center;
+    display: grid;
+    grid-template-rows: 1.15fr 1fr;
+    width: min(100%, 300px);
+    aspect-ratio: 0.82;
+    padding: 10px;
+    background: #fff;
+    border-radius: 3px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+  }
+  .ag-mini__photo {
+    position: relative;
+    background:
+      radial-gradient(circle at 70% 32%, #fff4c2 0 7%, transparent 7.5%), linear-gradient(180deg, #e7c4ff, #8e4dff);
+  }
+  .ag-mini__photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #3f1f86;
+    clip-path: polygon(0 80%, 22% 55%, 40% 70%, 62% 45%, 82% 64%, 100% 52%, 100% 100%, 0 100%);
+  }
+  .ag-mini__sel {
+    position: absolute;
+    inset: -4px;
+    z-index: 1;
+    border: 1.5px solid var(--b);
+    border-radius: 2px;
+  }
+  .ag-mini__month {
+    padding: 8px 2px 0;
+    color: #1d1d26;
+  }
+  .ag-mini__month strong {
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--ag-head);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--b);
+  }
+  .ag-mini__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    font-size: 8.5px;
+    text-align: center;
+    color: #6c6c80;
+  }
+  .ag-mini__days .is-on {
+    border-radius: 50%;
+    background: var(--b);
+    color: #fff;
+  }
+  .ag-mini__zoom {
+    display: inline-flex;
+    gap: 10px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--mute);
+    font-size: 11px;
+  }
+
+  .ag-brand__points {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: clamp(48px, 6vw, 88px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ag-brand__points li {
+    padding: 26px;
+  }
+  .ag-brand__points h3 {
+    margin-top: 18px;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  .ag-brand__points p {
+    margin-top: 8px;
+    color: var(--ag-muted);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 960px) {
+    .ag-brand__grid {
+      grid-template-columns: 1fr;
+    }
+    .ag-mini {
+      transform: none;
+    }
+    .ag-brand__points {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .ag-mini {
+      aspect-ratio: auto;
+      font-size: 10.5px;
+    }
+    .ag-mini__body {
+      grid-template-columns: 42px 1fr;
+    }
+    .ag-mini__panel {
+      display: none;
+    }
+    .ag-mini__title {
+      display: none;
+    }
+    .ag-mini__top {
+      grid-template-columns: 1fr auto;
+    }
+  }
+</style>
