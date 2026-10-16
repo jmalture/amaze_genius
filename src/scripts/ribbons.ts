@@ -48,6 +48,8 @@ export interface RibbonOptions {
   duration?: number;
   /** delay of the shape wave along the ribbon, in poses from the first to the last point */
   lag?: number;
+  /** pace of the ambient wobble, twist and sparkles (1 = default) */
+  motion?: number;
   segments?: number;
   sparkles?: number;
   alpha?: number;
@@ -197,8 +199,6 @@ function compile(gl: WebGLRenderingContext, vs: string, fs: string) {
 /** Catmull-Rom through four values: passes through b at f=0 and c at f=1, with matching speed on both sides. */
 const crv = (a: number, b: number, c: number, d: number, f: number) =>
   0.5 * (2 * b + (c - a) * f + (2 * a - 5 * b + 4 * c - d) * f * f + (3 * b - a - 3 * c + d) * f * f * f);
-/** shift hue h by whole turns so it is as close as possible to ref (no long way round the colour wheel) */
-const near = (h: number, ref: number) => h - Math.round(h - ref);
 
 export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   opts = { ...opts };
@@ -319,6 +319,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
 
   const duration = opts.duration ?? 7;
   const lag = opts.lag ?? 0.35;
+  const motion = opts.motion ?? 1;
   const span = opts.span ?? 1.12;
   const baseAlpha = opts.alpha ?? 0.5;
   const intro = opts.intro !== false && !opts.still;
@@ -388,7 +389,8 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
    * no sudden change. Each control point runs a little behind the previous one (lag), so a new shape flows along
    * the ribbon like a wave. On top: a gentle wobble, the pointer and the scroll position.
    */
-  const pose = (t: number) => {
+  const pose = (time: number) => {
+    const t = time * motion; // ambient wobble pace
     const portrait = aspect < 1;
     specs.forEach((rb, r) => {
       const n = rb.poses.length;
@@ -397,7 +399,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
       const sx = rb.flipX ? -1 : 1;
       const sy = (rb.flipY ? -1 : 1) * (portrait ? 0.62 : 1);
       const wMul = (rb.width ?? 1) * (portrait ? 0.75 : 1);
-      const base = opts.pose != null ? opts.pose : warp(r, t);
+      const base = opts.pose != null ? opts.pose : warp(r, time);
       for (let i = 0; i < N; i++) {
         const si = base + (rb.offset ?? 0) - (opts.pose != null ? 0 : lag * (i / (N - 1)));
         const k = Math.floor(si);
@@ -407,10 +409,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
         const q2 = P[(((k + 1) % n) + n) % n][i];
         const q3 = P[(((k + 2) % n) + n) % n][i];
         const v = (j: number) => crv(q0[j], q1[j], q2[j], q3[j], f);
-        const h1 = q1[5];
-        const h0 = near(q0[5], h1);
-        const h2 = near(q2[5], h1);
-        const h3 = near(q3[5], h2);
+
         const ph = i * 1.7 + r * 2.3;
         const x = v(0) + live * 0.03 * Math.sin(t * 0.6 + ph);
         const y = v(1) + live * (0.06 * Math.sin(t * 0.9 + ph) + mouse.y * 0.05) - scroll * 0.35;
@@ -418,7 +417,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
         const w = Math.max(0.02, v(3)) * wMul * (1 + live * 0.18 * Math.sin(t * 0.8 + ph * 1.3));
         const tw =
           v(4) + live * (0.4 * Math.sin(t * 0.45 + ph * 0.6) + mouse.x * 1.1 * (i / (N - 1) - 0.5)) + scroll * 2.4;
-        const hue = crv(h0, h1, h2, h3, f);
+        const hue = v(5); // numeric blend; the pose data is numbered so this never wraps (see ribbon-poses.ts)
         const o = (r * N + i) * 4;
         uP[o] = x * sx;
         uP[o + 1] = y * sy;
@@ -464,7 +463,7 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
     if (SPARKS) {
       gl.useProgram(sparkProg);
       setCommon(SU, introP);
-      gl.uniform1f(SU.uT, time);
+      gl.uniform1f(SU.uT, time * motion);
       gl.uniform1f(SU.uDpr, dpr);
       gl.bindBuffer(gl.ARRAY_BUFFER, sparkBuf);
       gl.enableVertexAttribArray(aSpark);

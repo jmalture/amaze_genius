@@ -73,7 +73,8 @@ const t = pick(data as Record<string, any>, lang);
       pose: q != null ? Number(q) : undefined,
       sparkles: 9,
       alpha: 0.62,
-      duration: 7,
+      duration: 12,
+      motion: 0.6,
       ribbons: [
         { poses: HERO_POSES, lines: 92, fan: 0.3 },
         { poses: HERO_POSES, offset: 3, flipX: true, flipY: true, gain: 0.24, lines: 56, width: 0.75, fan: 0.2 },

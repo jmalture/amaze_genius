@@ -74,8 +74,17 @@ const spiral: Pose = [
   [0.94, -1.3, -0.1, 0.15, 4.85, 1.85],
 ];
 
-/** The hero sequence: starts (and freezes for PageSpeed / reduced motion) on the hero-mockup spectrum wave. */
-export const HERO_POSES: Pose[] = [spectrum, curl, arc, wave, rainbowS, spiral];
+/** Same shape, hue numbered one or more turns further round the colour wheel (looks identical). */
+const lift = (pose: Pose, turns: number): Pose => pose.map(([x, y, z, w, tw, h]) => [x, y, z, w, tw, h + turns]);
+
+/**
+ * The hero sequence: starts (and freezes for PageSpeed / reduced motion) on the hero-mockup spectrum wave.
+ * Colours blend numerically from pose to pose, so the hue numbering decides the path round the colour wheel. The
+ * turns below are chosen so every point takes the shortest consistent path and none winds round the wheel over a
+ * loop (otherwise neighbouring points drift apart and a full rainbow pops up between them). Re-check with a script
+ * if you change hues: for each point, |hue(next pose) - hue(pose)| should stay well under 1.
+ */
+export const HERO_POSES: Pose[] = [spectrum, lift(curl, 1), lift(arc, 1), lift(wave, 1), rainbowS, spiral];
 
 /** Contact section: calmer, cool colours only. */
 export const CONTACT_POSES: Pose[] = [

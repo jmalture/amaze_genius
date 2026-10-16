@@ -115,7 +115,8 @@ const ok = (form.form_ok as Record<string, string>)[lang] ?? form.form_ok.de;
           still: matchMedia('(prefers-reduced-motion: reduce)').matches,
           sparkles: 5,
           alpha: 0.3,
-          duration: 9,
+          duration: 14,
+          motion: 0.6,
           ribbons: [
             { poses: CONTACT_POSES, lines: 84 },
             { poses: CONTACT_POSES, offset: 1, flipX: true, flipY: true, gain: 0.55, lines: 56, width: 0.7 },
