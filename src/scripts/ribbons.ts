@@ -13,8 +13,9 @@
  *          values may run past 1, only the fraction counts)
  * The vertex shader runs a Catmull-Rom spline through the points and spreads the lines across the band.
  *
- * Morphing: every pose holds for a moment, then the next one rolls in point by point (a wave travelling along the
- * ribbon, with a little overshoot), so the shape feels rubbery instead of cross-fading. On top, every point wobbles,
+ * Morphing: the poses are keyframes on one smooth, closed curve through time. The ribbon glides through them at a
+ * steady pace without stopping, each point a little behind the previous one, so a new shape flows along the ribbon
+ * instead of snapping in. On top, every point wobbles,
  * the twist follows the pointer and the scroll position.
  *
  * Without a GPU (software rendering, e.g. headless Chrome in PageSpeed) or with reduced motion: one still frame of the
@@ -43,9 +44,10 @@ export interface RibbonSpec {
 
 export interface RibbonOptions {
   ribbons: RibbonSpec[];
-  /** seconds a pose holds, seconds a morph takes */
-  hold?: number;
-  morph?: number;
+  /** seconds the ribbon takes to travel from one pose to the next (it never stops) */
+  duration?: number;
+  /** delay of the shape wave along the ribbon, in poses from the first to the last point */
+  lag?: number;
   segments?: number;
   sparkles?: number;
   alpha?: number;
@@ -192,15 +194,11 @@ function compile(gl: WebGLRenderingContext, vs: string, fs: string) {
   return p;
 }
 
-const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
-const smoother = (x: number) => x * x * x * (x * (x * 6 - 15) + 10);
-/** ease in-out with a soft overshoot: the "rubber" in the morph */
-const rubber = (x: number) => {
-  const c = 1.25;
-  return x < 0.5
-    ? (Math.pow(2 * x, 2) * ((c + 1) * 2 * x - c)) / 2
-    : (Math.pow(2 * x - 2, 2) * ((c + 1) * (x * 2 - 2) + c) + 2) / 2;
-};
+/** Catmull-Rom through four values: passes through b at f=0 and c at f=1, with matching speed on both sides. */
+const crv = (a: number, b: number, c: number, d: number, f: number) =>
+  0.5 * (2 * b + (c - a) * f + (2 * a - 5 * b + 4 * c - d) * f * f + (3 * b - a - 3 * c + d) * f * f * f);
+/** shift hue h by whole turns so it is as close as possible to ref (no long way round the colour wheel) */
+const near = (h: number, ref: number) => h - Math.round(h - ref);
 
 export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   opts = { ...opts };
@@ -319,9 +317,8 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
     scroll = Math.max(0, Math.min(1.5, -r.top / Math.max(1, r.height)));
   };
 
-  const hold = opts.hold ?? 2.6;
-  const morph = opts.morph ?? 3.6;
-  const cycle = hold + morph;
+  const duration = opts.duration ?? 7;
+  const lag = opts.lag ?? 0.35;
   const span = opts.span ?? 1.12;
   const baseAlpha = opts.alpha ?? 0.5;
   const intro = opts.intro !== false && !opts.still;
@@ -331,50 +328,97 @@ export function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptions) {
   let running = false;
   let raf = 0;
 
-  /** Current control points of every ribbon: pose sequence + rubbery staggered morph + wobble + pointer/scroll. */
+  /**
+   * Even speed: the poses are not equally far apart, so stepping through them at a fixed rate would make some
+   * transitions twice as fast as others. Measure the shape change along the whole loop once (positions, width and
+   * twist of all control points) and map time to "distance travelled", so the ribbon changes at the same pace
+   * everywhere. The loop still takes poses × duration seconds.
+   */
+  const RES = 120; // samples per pose
+  const sampleAt = (rb: RibbonSpec, si: number, out: number[]) => {
+    const P = rb.poses;
+    const n = P.length;
+    for (let i = 0; i < N; i++) {
+      const sj = si - lag * (i / (N - 1)); // same per-point delay as when drawing
+      const k = Math.floor(sj);
+      const f = sj - k;
+      const q0 = P[(((k - 1) % n) + n) % n][i];
+      const q1 = P[((k % n) + n) % n][i];
+      const q2 = P[(((k + 1) % n) + n) % n][i];
+      const q3 = P[(((k + 2) % n) + n) % n][i];
+      for (let j = 0; j < 5; j++) out[i * 5 + j] = crv(q0[j], q1[j], q2[j], q3[j], f);
+    }
+  };
+  const W = [1, 1, 0.5, 1.5, 0.12]; // weight of x, y, z, width, twist in "how much the shape changed"
+  const tables = specs.map((rb) => {
+    const n = rb.poses.length;
+    const M = n * RES;
+    const cum = new Float64Array(M + 1);
+    const a: number[] = [];
+    const b: number[] = [];
+    sampleAt(rb, 0, a);
+    for (let m = 1; m <= M; m++) {
+      sampleAt(rb, m / RES, b);
+      let d = 0;
+      for (let q = 0; q < N * 5; q++) d += W[q % 5] * Math.abs(b[q] - a[q]);
+      cum[m] = cum[m - 1] + d;
+      for (let q = 0; q < N * 5; q++) a[q] = b[q];
+    }
+    return { cum, M, n };
+  });
+  const warp = (r: number, t: number) => {
+    const { cum, M, n } = tables[r];
+    const loop = n * duration;
+    const laps = Math.floor(t / loop);
+    const target = ((t - laps * loop) / loop) * cum[M];
+    let lo = 0;
+    let hi = M;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (cum[mid] <= target) lo = mid;
+      else hi = mid;
+    }
+    const span = cum[hi] - cum[lo] || 1;
+    return laps * n + (lo + (target - cum[lo]) / span) / RES;
+  };
+
+  /**
+   * Current control points of every ribbon. The poses are keyframes on one closed, smooth curve through time
+   * (Catmull-Rom): the ribbon passes through each pose without stopping and keeps its speed, so there is no hold and
+   * no sudden change. Each control point runs a little behind the previous one (lag), so a new shape flows along
+   * the ribbon like a wave. On top: a gentle wobble, the pointer and the scroll position.
+   */
   const pose = (t: number) => {
     const portrait = aspect < 1;
     specs.forEach((rb, r) => {
       const n = rb.poses.length;
-      let A: Pose;
-      let B: Pose;
-      let m = 0;
-      let dir = 1;
-      if (opts.pose != null) {
-        A = B = rb.poses[(((opts.pose + (rb.offset ?? 0)) % n) + n) % n];
-      } else {
-        const tt = t + (rb.offset ?? 0) * cycle;
-        const ci = Math.floor(tt / cycle);
-        const local = tt - ci * cycle;
-        const at = ((ci % n) + n) % n;
-        A = rb.poses[at];
-        B = rb.poses[(at + 1) % n];
-        m = local < hold ? 0 : (local - hold) / morph;
-        dir = ci % 2 ? -1 : 1; // the morph wave runs left→right, then right→left
-      }
+      const P = rb.poses;
       const live = opts.still ? 0 : 1;
-      const stag = 0.11;
       const sx = rb.flipX ? -1 : 1;
       const sy = (rb.flipY ? -1 : 1) * (portrait ? 0.62 : 1);
       const wMul = (rb.width ?? 1) * (portrait ? 0.75 : 1);
+      const base = opts.pose != null ? opts.pose : warp(r, t);
       for (let i = 0; i < N; i++) {
-        const order = dir > 0 ? i : N - 1 - i;
-        const mi = clamp01(m * (1 + stag * (N - 1)) - stag * order);
-        const mp = rubber(mi);
-        const ms = smoother(mi);
-        const a = A[i];
-        const b = B[i];
+        const si = base + (rb.offset ?? 0) - (opts.pose != null ? 0 : lag * (i / (N - 1)));
+        const k = Math.floor(si);
+        const f = si - k;
+        const q0 = P[(((k - 1) % n) + n) % n][i];
+        const q1 = P[((k % n) + n) % n][i];
+        const q2 = P[(((k + 1) % n) + n) % n][i];
+        const q3 = P[(((k + 2) % n) + n) % n][i];
+        const v = (j: number) => crv(q0[j], q1[j], q2[j], q3[j], f);
+        const h1 = q1[5];
+        const h0 = near(q0[5], h1);
+        const h2 = near(q2[5], h1);
+        const h3 = near(q3[5], h2);
         const ph = i * 1.7 + r * 2.3;
-        const x = a[0] + (b[0] - a[0]) * mp + live * 0.03 * Math.sin(t * 0.6 + ph);
-        const y = a[1] + (b[1] - a[1]) * mp + live * (0.06 * Math.sin(t * 0.9 + ph) + mouse.y * 0.05) - scroll * 0.35;
-        const z = a[2] + (b[2] - a[2]) * mp + live * 0.16 * Math.sin(t * 0.5 + ph * 0.7);
-        const w = (a[3] + (b[3] - a[3]) * ms) * wMul * (1 + live * 0.18 * Math.sin(t * 0.8 + ph * 1.3));
+        const x = v(0) + live * 0.03 * Math.sin(t * 0.6 + ph);
+        const y = v(1) + live * (0.06 * Math.sin(t * 0.9 + ph) + mouse.y * 0.05) - scroll * 0.35;
+        const z = v(2) + live * 0.16 * Math.sin(t * 0.5 + ph * 0.7);
+        const w = Math.max(0.02, v(3)) * wMul * (1 + live * 0.18 * Math.sin(t * 0.8 + ph * 1.3));
         const tw =
-          a[4] +
-          (b[4] - a[4]) * ms +
-          live * (0.4 * Math.sin(t * 0.45 + ph * 0.6) + mouse.x * 1.1 * (i / (N - 1) - 0.5)) +
-          scroll * 2.4;
-        const hue = a[5] + (b[5] - a[5]) * ms;
+          v(4) + live * (0.4 * Math.sin(t * 0.45 + ph * 0.6) + mouse.x * 1.1 * (i / (N - 1) - 0.5)) + scroll * 2.4;
+        const hue = crv(h0, h1, h2, h3, f);
         const o = (r * N + i) * 4;
         uP[o] = x * sx;
         uP[o + 1] = y * sy;
