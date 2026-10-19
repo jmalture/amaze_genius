@@ -190,7 +190,7 @@ select {
 }
 .ag-section {
   position: relative;
-  padding-block: clamp(80px, 10vw, 160px);
+  padding-block: clamp(64px, 10vw, 160px);
 }
 
 /* ---------- Type helpers ---------- */

@@ -86,7 +86,46 @@ const langs = LANGS.filter((l) => LIVE_LANGS.includes(l.code));
   </div>
 </header>
 
+<div class="ag-mcta" data-mcta inert>
+  <a class="ag-btn" href={t.h_cta_href}>
+    {t.h_cta}
+    <Icon name="arrow" size={18} />
+  </a>
+</div>
+
 <style is:global>
+  .ag-mcta {
+    display: none;
+  }
+  @media (max-width: 700px) {
+    .ag-mcta {
+      display: flex;
+      justify-content: center;
+      position: fixed;
+      z-index: 90;
+      left: 0;
+      right: 0;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      pointer-events: none;
+      translate: 0 calc(100% + 24px);
+      transition: translate var(--ag-med) var(--ag-ease);
+    }
+    .ag-mcta.is-on {
+      translate: 0 0;
+    }
+    .ag-mcta .ag-btn {
+      pointer-events: auto;
+      min-height: 46px;
+      padding-inline: 22px;
+      font-size: 0.9375rem;
+      box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.55),
+        var(--ag-glow-blue);
+    }
+    .ag-hd.is-open ~ .ag-mcta {
+      display: none;
+    }
+  }
   .ag-hd {
     position: fixed;
     inset: 0 0 auto 0;

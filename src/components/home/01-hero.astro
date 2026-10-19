@@ -369,6 +369,12 @@ const t = pick(data as Record<string, any>, lang);
     }
   }
   @media (max-width: 560px) {
+    .ag-hero {
+      padding-block: calc(var(--ag-header-h) + 16px) 48px;
+    }
+    .ag-hero__mark {
+      margin-bottom: 18px;
+    }
     .ag-hero__ctas {
       width: 100%;
       flex-direction: column;

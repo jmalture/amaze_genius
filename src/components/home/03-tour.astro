@@ -4,6 +4,8 @@
  * dark-mode screens (Figma "AmazeGenius DM" → Fotobuch Desktop → "000 Dark mode", dm Foto branding).
  * Desktop: scroll-driven; tablet/mobile: the window sticks above the steps. On step 4 the window narrows into a
  * tablet for the text-editing screen. Texts: home.json "tour_*". Images: public/media/tour-*.webp.
+ * Phones (≤700px) get their own layout instead: a swipeable row of cards, each showing a zoomed-in crop of the
+ * screen (z = zoom, fx/fy = top-left corner of the crop as a fraction of the image) above the step text.
  */
 import { pick, type Lang } from '../../i18n';
 import data from '../../i18n/home.json';
@@ -12,12 +14,13 @@ const t = pick(data as Record<string, any>, lang);
 const steps = t.tour_steps as { key: string; title: string; text: string }[];
 const alts = t.tour_alt as string[];
 const shots = [
-  { src: 'tour-1-fotos', w: [1600, 960], h: 857 },
-  { src: 'tour-2-seiten', w: [1600, 960], h: 857 },
-  { src: 'tour-3-bearbeiten', w: [1600, 960], h: 990 },
-  { src: 'tour-4-text', w: [1024, 720], h: 746, tablet: true },
-  { src: 'tour-5-vorschau', w: [1600, 960], h: 857 },
+  { src: 'tour-1-fotos', w: [1600, 960], h: 857, z: 1.8, fx: 0, fy: 0.05 },
+  { src: 'tour-2-seiten', w: [1600, 960], h: 857, z: 1.8, fx: 0.33, fy: 0.15 },
+  { src: 'tour-3-bearbeiten', w: [1600, 960], h: 990, z: 1.8, fx: 0, fy: 0.12 },
+  { src: 'tour-4-text', w: [1024, 720], h: 746, tablet: true, z: 1.6, fx: 0, fy: 0.08 },
+  { src: 'tour-5-vorschau', w: [1600, 960], h: 857, z: 1.8, fx: 0.42, fy: 0.15 },
 ];
+const pad = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <section class="ag-section ag-tour" id="rundgang">
@@ -83,6 +86,48 @@ const shots = [
         <p class="ag-tour__note">{t.tour_mock_note}</p>
       </div>
     </div>
+
+    <div class="ag-tourm" data-tourm>
+      <ol class="ag-tourm__track" tabindex="0" aria-label={t.tour_kicker}>
+        {steps.map((s, i) => (
+          <li class="ag-tourm__slide" data-slide={i} aria-label={`${pad(i)} / ${pad(steps.length - 1)}`}>
+            <div
+              class={`ag-tourm__shot${shots[i].tablet ? ' is-tablet' : ''}`}
+              style={`--z:${shots[i].z};--fx:${shots[i].fx * -100}%;--fy:${shots[i].fy * -100}%`}
+            >
+              <img
+                src={`/media/${shots[i].src}-${shots[i].w[1]}.webp`}
+                srcset={`/media/${shots[i].src}-${shots[i].w[1]}.webp ${shots[i].w[1]}w, /media/${shots[i].src}-${shots[i].w[0]}.webp ${shots[i].w[0]}w`}
+                sizes={`${Math.round(shots[i].z * 84)}vw`}
+                alt={alts[i]}
+                width={shots[i].w[0]}
+                height={shots[i].h}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="ag-tourm__body">
+              <span class="ag-tourm__num">{pad(i)}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div class="ag-tourm__dots">
+        {steps.map((s, i) => (
+          <button
+            type="button"
+            data-go={i}
+            aria-label={`${pad(i)} ${s.title}`}
+            aria-current={i === 0 ? 'true' : undefined}
+          >
+            <span />
+          </button>
+        ))}
+      </div>
+      <p class="ag-tour__note ag-tourm__note">{t.tour_mock_note}</p>
+    </div>
   </div>
 </section>
 
@@ -138,11 +183,40 @@ const shots = [
       ([e], obs) => {
         if (!e.isIntersecting) return;
         obs.disconnect();
-        shot.querySelectorAll('img').forEach((img) => (img.loading = 'eager'));
+        if (shot.offsetParent) shot.querySelectorAll('img').forEach((img) => (img.loading = 'eager'));
       },
       { rootMargin: '600px' },
     ).observe(shot);
     set(0);
+  }
+
+  // Phones: swipeable cards. The dots follow the card in view and jump to a card on tap.
+  const m = document.querySelector<HTMLElement>('[data-tourm]');
+  const track = m?.querySelector<HTMLElement>('.ag-tourm__track');
+  if (m && track) {
+    const slides = [...track.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...m.querySelectorAll<HTMLButtonElement>('[data-go]')];
+    const on = (n: number) => dots.forEach((d, i) => d.toggleAttribute('aria-current', i === n));
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && on(Number((e.target as HTMLElement).dataset.slide))),
+      { root: track, threshold: 0.6 },
+    );
+    slides.forEach((s) => io.observe(s));
+    dots.forEach((d, i) =>
+      d.addEventListener('click', () => {
+        const s = slides[i];
+        track.scrollTo({ left: s.offsetLeft - slides[0].offsetLeft, behavior: 'smooth' });
+      }),
+    );
+    // once the first card is near, load the rest so swiping never shows a blank
+    new IntersectionObserver(
+      ([e], obs) => {
+        if (!e.isIntersecting || !m.offsetParent) return;
+        obs.disconnect();
+        track.querySelectorAll('img').forEach((img) => (img.loading = 'eager'));
+      },
+      { rootMargin: '400px' },
+    ).observe(m);
   }
 </script>
 
@@ -354,7 +428,119 @@ const shots = [
     scale: 1;
   }
 
+  /* ---------- Phones: swipeable cards ---------- */
+  .ag-tourm {
+    display: none;
+  }
   @media (max-width: 700px) {
+    .ag-tour__grid {
+      display: none;
+    }
+    .ag-tourm {
+      display: block;
+      margin-top: 32px;
+    }
+    .ag-tourm__track {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 84%;
+      gap: 12px;
+      margin: 0 calc(-1 * var(--ag-gutter));
+      padding: 4px var(--ag-gutter) 8px;
+      scroll-padding-inline: var(--ag-gutter);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      list-style: none;
+    }
+    .ag-tourm__track::-webkit-scrollbar {
+      display: none;
+    }
+    .ag-tourm__track:focus-visible {
+      outline: 2px solid var(--ag-blue-l);
+      outline-offset: -2px;
+    }
+    .ag-tourm__slide {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      scroll-snap-align: start;
+      border-radius: var(--ag-r-lg);
+      background: var(--ag-surface);
+      border: 1px solid var(--ag-line);
+      overflow: hidden;
+    }
+    .ag-tourm__shot {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #262626;
+      border-bottom: 1px solid var(--ag-line);
+    }
+    .ag-tourm__shot img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(var(--z) * 100%);
+      max-width: none;
+      height: auto;
+      translate: var(--fx) var(--fy);
+    }
+    .ag-tourm__body {
+      padding: 18px 18px 22px;
+    }
+    .ag-tourm__num {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--ag-muted);
+    }
+    .ag-tourm__body h3 {
+      margin-top: 12px;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    .ag-tourm__body p {
+      margin-top: 8px;
+      color: var(--ag-muted);
+      font-size: 0.9375rem;
+    }
+    .ag-tourm__dots {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .ag-tourm__dots button {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 44px;
+      padding: 0;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+    .ag-tourm__dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      transition:
+        width var(--ag-med) var(--ag-ease),
+        background-color var(--ag-med);
+    }
+    .ag-tourm__dots [aria-current] span {
+      width: 28px;
+      background: var(--ag-spectrum);
+    }
+    .ag-tourm .ag-tourm__note {
+      display: block;
+      margin-top: 2px;
+    }
     .ag-shot {
       grid-template-rows: 24px 1fr;
       border-radius: 10px;

@@ -38,6 +38,18 @@
   segment steeper than ~35°); 21:9 26°, 4:3 40°. Portrait screens squeeze the shape vertically (factor 0.42, was
   0.62), steepest 46°. Posters re-rendered.
 
+## Update 19.10.: mobile pass
+- Checked at 360 / 390 / 430 px (touch emulation) and 768 px.
+- Rundgang on phones (≤700px): swipeable cards instead of the sticky window. Each card shows a zoomed crop of the
+  real screen (zoom + crop corner per step in `03-tour.astro` → `shots`) above the step text; dots follow the swipe
+  and jump on tap. Tablet and desktop unchanged.
+- Pinned "Demo anfragen" pill at the bottom on phones once the hero is out of view; hidden over the contact form,
+  the footer and the open menu.
+- Mobil: text before the devices. White Label points and "Für wen" cards: icon left, compact. Jenomics stats in one
+  row. References: description no longer wraps. Hero a bit tighter. Section spacing on phones 64 px (was 80).
+- Tap targets: footer links 40 px rows, Light/Dark toggle 44 px, carousel dots 36×44.
+- Page at 360 px: 12,400 px tall (was 14,900). Lighthouse mobile (server.mjs): 99 / 100 / 100 / 100, TBT 10–30 ms.
+
 ## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
   calendar for a real render.

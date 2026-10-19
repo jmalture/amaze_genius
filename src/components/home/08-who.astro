@@ -186,6 +186,45 @@ const stats = t.jx_stats as { value: string; label: string }[];
   @media (max-width: 520px) {
     .ag-who__grid {
       grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .ag-who__grid li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 16px;
+      padding: 18px;
+    }
+    .ag-who__ico {
+      grid-row: span 2;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+    }
+    .ag-who__grid h3 {
+      margin-top: 2px;
+      font-size: 1.125rem;
+    }
+    .ag-who__grid p {
+      margin-top: 4px;
+    }
+    .ag-jx {
+      margin-top: 40px;
+      padding: 24px 20px;
+    }
+    .ag-jx__stats {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .ag-jx__stats div {
+      justify-content: flex-end;
+      padding: 12px 10px;
+    }
+    .ag-jx__stats dd {
+      font-size: 1rem;
+    }
+    .ag-jx__stats dt {
+      font-size: 0.75rem;
+      line-height: 1.35;
     }
   }
 </style>

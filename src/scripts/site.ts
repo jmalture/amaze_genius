@@ -144,7 +144,27 @@ function initTilt() {
   });
 }
 
+// 5. Phones: a demo button pinned to the bottom once the hero is out of view, gone again over the contact form
+// and the footer (they have their own buttons). CSS shows it only up to 700px.
+function initMobileCta() {
+  const bar = document.querySelector<HTMLElement>('[data-mcta]');
+  const hero = document.querySelector('.ag-hero');
+  if (!bar || !hero) return;
+  const state = new Map<Element, boolean>();
+  const targets = [hero, document.querySelector('#kontakt'), document.querySelector('.ag-ft')].filter(
+    Boolean,
+  ) as Element[];
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => state.set(e.target, e.isIntersecting));
+    const on = ![...state.values()].some(Boolean);
+    bar.classList.toggle('is-on', on);
+    bar.inert = !on;
+  });
+  targets.forEach((t) => io.observe(t));
+}
+
 initReveal();
 initHeader();
 initSpotlight();
 initTilt();
+initMobileCta();

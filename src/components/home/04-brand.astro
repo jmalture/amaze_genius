@@ -619,6 +619,9 @@ const first = presets[0];
     }
   }
   @media (max-width: 560px) {
+    .ag-brand__mode button {
+      padding-block: 11px;
+    }
     .ag-mini {
       aspect-ratio: auto;
       font-size: 10.5px;
@@ -634,6 +637,26 @@ const first = presets[0];
     }
     .ag-mini__top {
       grid-template-columns: 1fr auto;
+    }
+    .ag-brand__points {
+      gap: 10px;
+      margin-top: 40px;
+    }
+    .ag-brand__points li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 16px;
+      padding: 18px;
+    }
+    .ag-brand__points .ag-ico {
+      grid-row: span 2;
+    }
+    .ag-brand__points h3 {
+      margin-top: 2px;
+      font-size: 1.125rem;
+    }
+    .ag-brand__points p {
+      margin-top: 4px;
     }
   }
 </style>
