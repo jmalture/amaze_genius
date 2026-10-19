@@ -429,7 +429,7 @@ export async function createRibbons(canvas: HTMLCanvasElement, opts: RibbonOptio
       const P = rb.poses;
       const live = opts.still ? 0 : 1;
       const sx = rb.flipX ? -1 : 1;
-      const sy = (rb.flipY ? -1 : 1) * (portrait ? 0.62 : 1);
+      const sy = (rb.flipY ? -1 : 1) * (portrait ? 0.42 : 1); // narrow screens: flatter, so the ribbon stays horizontal
       const wMul = (rb.width ?? 1) * (portrait ? 0.75 : 1);
       const base = opts.pose != null ? opts.pose : warp(r, time);
       for (let i = 0; i < N; i++) {

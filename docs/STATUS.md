@@ -1,4 +1,4 @@
-# Status (2026-10-16, afternoon)
+# Status (2026-10-19)
 
 ## Done
 - Homepage DE (`/`), dark theme, 10 sections: hero with WebGL ribbons, Sortiment (product cards + marquee),
@@ -31,6 +31,12 @@
   `server.mjs` adds Brotli/gzip + cache headers (`npm start`). Lighthouse local: desktop 100 (TBT 0 ms),
   mobile 99 (TBT 30 ms), was 86 / TBT 320 ms desktop on PageSpeed.
 - Posters: rendered from `/?pose=0` at 1600×900 (landscape) and 390×844 @2x → 600×1298 (portrait), WebP q62.
+
+## Update 19.10.: ribbons stay horizontal
+- Hero poses flattened (spectrum, curl, rainbow S; the spiral is now a horizontal coil, not a vertical one), band
+  ends narrower so the two strands don't swing upright. Steepest segment on 16:9 went from 84° to 32° (target: no
+  segment steeper than ~35°); 21:9 26°, 4:3 40°. Portrait screens squeeze the shape vertically (factor 0.42, was
+  0.62), steepest 46°. Posters re-rendered.
 
 ## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
