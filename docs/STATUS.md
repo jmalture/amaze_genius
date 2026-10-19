@@ -50,6 +50,11 @@
 - Tap targets: footer links 40 px rows, Light/Dark toggle 44 px, carousel dots 36×44.
 - Page at 360 px: 12,400 px tall (was 14,900). Lighthouse mobile (server.mjs): 99 / 100 / 100 / 100, TBT 10–30 ms.
 
+## Update 19.10.: Ablauf plays 1 → 4
+- When the steps come into view the line draws from node to node (1.1 s per step) and each node lights up with its
+  title and text as the line reaches it; plays once. Works in the row (desktop) and the column (≤860px), all
+  browsers (no scroll-timeline needed). Reduced motion / no JS: everything shown at once.
+
 ## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
   calendar for a real render.
