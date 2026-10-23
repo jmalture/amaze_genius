@@ -55,6 +55,11 @@
   title and text as the line reaches it; plays once. Works in the row (desktop) and the column (≤860px), all
   browsers (no scroll-timeline needed). Reduced motion / no JS: everything shown at once.
 
+## Update 23.10.: no "dm" in the editor title
+- Rundgang screens: the editor title "dm-Fotobuch 30x30" now reads "mein-Fotobuch 30x30" (steps 1–4, both sizes).
+  Edited in the lossless Figma exports (original pixels of "m" and "-Fotobuch 30x30" kept, "ein" drawn in Fira
+  Sans to match), then re-exported as WebP q80 with the same crops. The Vorschau screen never showed it.
+
 ## Graphics still to come
 - **White Label** (`04-brand.astro`): mini editor is HTML/CSS on purpose (it re-themes live). Keep, or swap the
   calendar for a real render.
